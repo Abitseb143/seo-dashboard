@@ -1,0 +1,227 @@
+{
+    "name": "SEO Fixer AI Auto Audit",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "days",
+                            "triggerAtHour": 8,
+                            "triggerAtMinute": 0,
+                            "interval": 4
+                        }
+                    ]
+                }
+            },
+            "id": "schedule-trigger-every-4-days",
+            "name": "Schedule Trigger",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1,
+            "position": [
+                400,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "keepOnlySet": true,
+                "values": {
+                    "string": [
+                        {
+                            "name": "urls",
+                            "value": "https://example.com"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "load-project-urls",
+            "name": "Load Project URLs",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 2,
+            "position": [
+                620,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://your-seo-app-domain.com/api/audits/create",
+                "sendBody": true,
+                "contentType": "raw",
+                "rawBody": "={\n  \"targetUrls\": [\"{{$json.urls}}\"],\n  \"projectName\": \"Automated n8n Audit\"\n}",
+                "options": {}
+            },
+            "id": "trigger-webhook",
+            "name": "Trigger SEO Engine Webhook",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                840,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "amount": 5,
+                "unit": "seconds"
+            },
+            "id": "wait-for-completion",
+            "name": "Wait (Simulate Processing)",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                1060,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://your-seo-app-domain.com/api/audits/latest",
+                "options": {}
+            },
+            "id": "fetch-audit-results",
+            "name": "Fetch Audit Results",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4,
+            "position": [
+                1280,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "number": [
+                        {
+                            "value1": "={{$json.stats.criticalIssues}}",
+                            "operation": "larger",
+                            "value2": 0
+                        }
+                    ]
+                }
+            },
+            "id": "check-critical-issues",
+            "name": "If Critical Issues Found",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                1500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "fromEmail": "alerts@seofixer.com",
+                "toEmail": "admin@yourcompany.com",
+                "subject": "=🚨 URGENT: {{$json.stats.criticalIssues}} Critical SEO Issues Detected!",
+                "html": "=Your SEO score is {{$json.overallScore}}. <br/><br/> We detected critical issues on your site. The top fix is: {{$json.bestFixes[0].issueTitle}} (Expected Impact: +{{$json.bestFixes[0].recommendedFix.expectedSEOImpact}}). <br/><br/> Log in to view the dashboard.",
+                "options": {}
+            },
+            "id": "send-critical-alert",
+            "name": "Send Critical Alert",
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 2,
+            "position": [
+                1740,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "fromEmail": "reports@seofixer.com",
+                "toEmail": "admin@yourcompany.com",
+                "subject": "=Weekly SEO Report - Score: {{$json.overallScore}}",
+                "html": "=Your latest SEO audit completed.<br><br>Overall Score: {{$json.overallScore}}<br>Total Issues: {{$json.stats.totalIssues}}<br><br>Top Recommendation:<br>{{$json.bestFixes[0].issueTitle}} - {{$json.bestFixes[0].recommendedFix.recommendedAction}}",
+                "options": {}
+            },
+            "id": "send-summary",
+            "name": "Send Summary Report",
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 2,
+            "position": [
+                1740,
+                420
+            ]
+        }
+    ],
+    "connections": {
+        "Schedule Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Load Project URLs",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Load Project URLs": {
+            "main": [
+                [
+                    {
+                        "node": "Trigger SEO Engine Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Trigger SEO Engine Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Wait (Simulate Processing)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Wait (Simulate Processing)": {
+            "main": [
+                [
+                    {
+                        "node": "Fetch Audit Results",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fetch Audit Results": {
+            "main": [
+                [
+                    {
+                        "node": "If Critical Issues Found",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "If Critical Issues Found": {
+            "main": [
+                [
+                    {
+                        "node": "Send Critical Alert",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send Summary Report",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": false,
+    "settings": {}
+}

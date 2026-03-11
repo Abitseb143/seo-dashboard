@@ -1,0 +1,35 @@
+// Fetcher exports
+export {
+  fetchPage,
+  fetchUrl,
+  createAuditContext,
+  type FetchResult,
+} from './fetcher';
+
+// Playwright fetcher exports
+export {
+  initBrowser,
+  closeBrowser,
+  fetchPageWithPlaywright,
+  measureCoreWebVitals,
+  getBrowser,
+  type PlaywrightFetchResult,
+} from './playwright-fetcher';
+
+// Crawler exports
+export {
+  Crawler,
+  createCrawler,
+  type CrawlProgressCallback,
+  type CrawlProgress,
+  type CrawlerOptions,
+  type CrawledPage,
+} from './crawler';
+
+// URL filter exports
+export {
+  UrlFilter,
+  createUrlFilter,
+  globToRegex,
+  type UrlFilterOptions,
+} from './url-filter';

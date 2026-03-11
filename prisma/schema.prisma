@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  url       String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  audits    Audit[]
+}
+
+model Audit {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  overallScore Float
+  status       String   @default("COMPLETED") // PENDING, RUNNING, COMPLETED, FAILED
+  createdAt    DateTime @default(now())
+  
+  pageAudits   PageAudit[]
+}
+
+model PageAudit {
+  id        String   @id @default(cuid())
+  auditId   String
+  audit     Audit    @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  
+  url       String
+  pageScore Float
+  createdAt DateTime @default(now())
+  
+  issues    Issue[]
+}
+
+model Issue {
+  id               String          @id @default(cuid())
+  pageAuditId      String
+  pageAudit        PageAudit       @relation(fields: [pageAuditId], references: [id], onDelete: Cascade)
+  
+  category         String          // e.g., technical, content, on-page, performance
+  severity         String          // e.g., critical, high, medium, low
+  issueTitle       String
+  problemSummary   String
+  whyItMatters     String
+  currentState     String
+  createdAt        DateTime        @default(now())
+  
+  recommendedFix   RecommendedFix?
+}
+
+model RecommendedFix {
+  id                     String   @id @default(cuid())
+  issueId                String   @unique
+  issue                  Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  
+  recommendedAction      String
+  bestFixOption          String
+  alternativeFixOptions  String?
+  expectedSEOImpact      Float
+  implementationDifficulty Float
+  estimatedEffort        String   // e.g., "< 30 mins", "1-2 hours"
+  codeExample            String?
+  cmsInstruction         String?
+  priorityRank           Float
+  status                 String   @default("PENDING") // PENDING, IN_PROGRESS, RESOLVED, IGNORED
+  confidenceLevel        Float
+  createdAt              DateTime @default(now())
+}
