@@ -51,6 +51,7 @@ model Issue {
   problemSummary   String
   whyItMatters     String
   currentState     String
+  pageUrl          String?         // The specific page where this issue was found
   createdAt        DateTime        @default(now())
   
   recommendedFix   RecommendedFix?

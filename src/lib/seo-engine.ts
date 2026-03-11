@@ -8,6 +8,7 @@ export interface SEOIssueData {
     problemSummary: string;
     whyItMatters: string;
     currentState: string;
+    pageUrl?: string;
     recommendedAction: string;
     bestFixOption: string;
     alternativeFixOptions?: string;
@@ -231,6 +232,7 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
                 recommendedAction: recommendation || `Fix the ${formatRuleTitle(ruleResult.ruleId)} issue described above.`,
                 bestFixOption: buildFixSuggestion(ruleResult, ruleResult.ruleId),
                 expectedSEOImpact: impact,
+                pageUrl: (d?.pageUrl as string) || url,
                 implementationDifficulty: difficulty,
                 estimatedEffort: estimateEffort(difficulty),
                 confidenceLevel: ruleResult.status === "fail" ? 100 : 80

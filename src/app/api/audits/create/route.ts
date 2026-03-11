@@ -81,6 +81,7 @@ export async function POST(req: Request) {
                         problemSummary: issue.problemSummary,
                         whyItMatters: issue.whyItMatters,
                         currentState: issue.currentState,
+                        pageUrl: issue.pageUrl,
                         recommendedFix: {
                             create: {
                                 recommendedAction: issue.recommendedAction,

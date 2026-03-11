@@ -15,6 +15,11 @@ export function FixCard({ issue }: { issue: any }) {
                             "bg-blue-50 text-blue-700 border-blue-200"}`}>
                     {priorityStr}
                 </span>
+                {issue.pageUrl && (
+                    <span className="text-xs font-medium px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 rounded-full font-mono">
+                        {issue.pageUrl}
+                    </span>
+                )}
                 {fix?.expectedSEOImpact && (
                     <span className="text-sm font-bold px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
                         +{fix.expectedSEOImpact} SEO points if fixed
