@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 export async function GET() {
     try {
         const latestAudit = await prisma.audit.findFirst({
+            where: { status: "COMPLETED" },
             orderBy: { createdAt: "desc" },
             include: {
                 project: true,

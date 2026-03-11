@@ -48,14 +48,13 @@ export async function POST(req: Request) {
         let totalScore = 0;
 
         for (const url of targetUrls) {
-            // Live crawl the page
+            console.log(`[Audit] Starting live SEO audit for: ${url}`);
             const liveIssues = await runLiveSEOAudit(url);
+            console.log(`[Audit] Audit engine returned ${liveIssues.length} issues for ${url}`);
 
-            // Calculate a dummy page score based on issues
             const pageScore = Math.max(0, 100 - (liveIssues.length * 5));
             totalScore += pageScore;
 
-            // Create Page Audit
             const pageAudit = await prisma.pageAudit.create({
                 data: {
                     auditId: audit.id,
@@ -64,7 +63,7 @@ export async function POST(req: Request) {
                 },
             });
 
-            // Insert Issues & Recommended Fixes
+            console.log(`[Audit] Saving ${liveIssues.length} issues to database...`);
             for (const issue of liveIssues) {
                 const priorityRank = calculatePriorityRank(
                     issue.severity,
@@ -72,36 +71,39 @@ export async function POST(req: Request) {
                     issue.implementationDifficulty
                 );
 
-                await prisma.issue.create({
-                    data: {
-                        pageAuditId: pageAudit.id,
-                        category: issue.category,
-                        severity: issue.severity,
-                        issueTitle: issue.issueTitle,
-                        problemSummary: issue.problemSummary,
-                        whyItMatters: issue.whyItMatters,
-                        currentState: issue.currentState,
-                        pageUrl: issue.pageUrl,
-                        recommendedFix: {
-                            create: {
-                                recommendedAction: issue.recommendedAction,
-                                bestFixOption: issue.bestFixOption,
-                                alternativeFixOptions: issue.alternativeFixOptions,
-                                expectedSEOImpact: issue.expectedSEOImpact,
-                                implementationDifficulty: issue.implementationDifficulty,
-                                estimatedEffort: issue.estimatedEffort,
-                                codeExample: issue.codeExample,
-                                cmsInstruction: issue.cmsInstruction,
-                                priorityRank,
-                                confidenceLevel: issue.confidenceLevel,
+                try {
+                    await prisma.issue.create({
+                        data: {
+                            pageAuditId: pageAudit.id,
+                            category: issue.category,
+                            severity: issue.severity,
+                            issueTitle: issue.issueTitle,
+                            problemSummary: issue.problemSummary,
+                            whyItMatters: issue.whyItMatters,
+                            currentState: issue.currentState,
+                            pageUrl: issue.pageUrl || url,
+                            recommendedFix: {
+                                create: {
+                                    recommendedAction: issue.recommendedAction,
+                                    bestFixOption: issue.bestFixOption,
+                                    alternativeFixOptions: issue.alternativeFixOptions,
+                                    expectedSEOImpact: issue.expectedSEOImpact,
+                                    implementationDifficulty: issue.implementationDifficulty,
+                                    estimatedEffort: issue.estimatedEffort,
+                                    codeExample: issue.codeExample,
+                                    cmsInstruction: issue.cmsInstruction,
+                                    priorityRank,
+                                    confidenceLevel: issue.confidenceLevel,
+                                },
                             },
                         },
-                    },
-                });
+                    });
+                } catch (e: any) {
+                    console.error(`[Audit] Failed to save issue "${issue.issueTitle}":`, e.message);
+                }
             }
         }
 
-        // Update Overall Audit Score
         const overallScore = totalScore / targetUrls.length;
         await prisma.audit.update({
             where: { id: audit.id },
@@ -111,6 +113,7 @@ export async function POST(req: Request) {
             },
         });
 
+        console.log(`[Audit] Audit ${audit.id} finished successfully.`);
         return NextResponse.json({
             success: true,
             auditId: audit.id,
@@ -119,6 +122,13 @@ export async function POST(req: Request) {
         });
     } catch (error: any) {
         console.error("Audit create error:", error);
+        // Attempt to mark as failed
+        if (error.auditId) {
+            await prisma.audit.update({
+                where: { id: error.auditId },
+                data: { status: "FAILED" }
+            }).catch(() => { });
+        }
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
