@@ -80,7 +80,26 @@ function extractCurrentState(result: RuleResult, ruleId: string): string {
     if (typeof d.characterCount === "number") snippets.push(`Length: ${d.characterCount} characters`);
     if (typeof d.estimatedWidth === "number") snippets.push(`Estimated pixel width: ${d.estimatedWidth}px`);
     if (typeof d.wordCount === "number") snippets.push(`Word count: ${d.wordCount}`);
-    if (Array.isArray(d.issues) && d.issues.length > 0) snippets.push(...(d.issues as string[]).slice(0, 3));
+
+    // Handle "issues" array which might contain complex objects (Title length, Heading length, etc.)
+    if (Array.isArray(d.issues) && d.issues.length > 0) {
+        if (ruleId.includes("heading-length")) {
+            const hIssues = (d.issues as any[]).slice(0, 3);
+            snippets.push("Headings with issues:\n" + hIssues.map(i => `  • H${i.level}: "${i.text}" (${i.length} chars)`).join("\n"));
+        } else if (ruleId.includes("anchor-text")) {
+            const aIssues = (d.issues as any[]).slice(0, 3);
+            snippets.push("Links with generic text:\n" + aIssues.map(i => `  • To ${i.href}: "${i.text}"`).join("\n"));
+        } else {
+            // General string fallback or first-level object mapping
+            const sample = d.issues[0];
+            if (typeof sample === "string") {
+                snippets.push(...(d.issues as string[]).slice(0, 3));
+            } else {
+                snippets.push(`Found ${d.issues.length} specific instances of this issue.`);
+            }
+        }
+    }
+
     if (Array.isArray(d.headings) && d.headings.length > 0) {
         const headings = (d.headings as Array<{ tag: string, text: string }>).slice(0, 5);
         snippets.push("Heading structure:\n" + headings.map(h => `  ${h.tag}: ${h.text}`).join("\n"));
@@ -88,7 +107,13 @@ function extractCurrentState(result: RuleResult, ruleId: string): string {
     if (typeof d.score === "number" && ruleId.includes("reading")) snippets.push(`Readability score: ${d.score} (${d.levelDescription || ""})`);
     if (d.missingAlts !== undefined) snippets.push(`Images missing alt: ${d.missingAlts}`);
     if (typeof d.totalImages === "number") snippets.push(`Total images: ${d.totalImages}`);
-    if (typeof d.ratio === "number") snippets.push(`Text-to-HTML ratio: ${(d.ratio * 100).toFixed(1)}%`);
+
+    // Correct Text-to-HTML ratio math (input is already 0-100 percentage)
+    if (typeof d.ratio === "number") {
+        const value = d.ratio;
+        snippets.push(`Text-to-HTML ratio: ${value.toFixed(1)}%`);
+    }
+
     if (Array.isArray(d.structure)) {
         const structure = (d.structure as Array<{ level: number, text: string }>).slice(0, 5);
         snippets.push("Found heading structure:\n" + structure.map(h => `  H${h.level}: ${h.text}`).join("\n"));
