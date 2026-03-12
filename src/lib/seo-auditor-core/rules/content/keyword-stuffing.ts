@@ -119,31 +119,33 @@ export const keywordStuffingRule = defineRule({
         ? severelyOverusedWords.slice(0, 3)
         : overusedWords.slice(0, 3);
 
+      const topOffenderList = topOffenders.map((o: any) => `"${o.word}" (${o.density}%)`).join(', ');
       return fail(
         'content-keyword-stuffing',
-        `Keyword stuffing detected: ${severelyOverusedWords.length + overusedWords.length} words with excessive density`,
+        `Keyword stuffing detected: ${severelyOverusedWords.length + overusedWords.length} words with excessive density (Top: ${topOffenderList})`,
         {
           ...details,
           topOffenders,
           impact:
             'Search engines penalize keyword stuffing. This can result in ranking demotions or manual actions.',
           recommendation:
-            'Rewrite content to sound natural. Use synonyms and related terms instead of repeating the same keywords. Aim for < 2% density for any single keyword.',
+            `Rewrite content to sound natural. Specifically reduce the usage of ${topOffenders.map((o: any) => `"${o.word}"`).join(', ')}. Aim for < 2% density for any single keyword.`,
         }
       );
     }
 
     // Check for potential issues
     if (overusedWords.length >= WARN_COUNT) {
+      const flagged = overusedWords.slice(0, 3).map((o: any) => `"${o.word}" (${o.density}%)`).join(', ');
       return warn(
         'content-keyword-stuffing',
-        `Potential keyword stuffing: ${overusedWords.length} words exceed ${WARN_DENSITY}% density`,
+        `Potential keyword stuffing: ${overusedWords.length} words exceed ${WARN_DENSITY}% density (Flagged: ${flagged})`,
         {
           ...details,
           impact:
             'High keyword density may appear unnatural to search engines',
           recommendation:
-            'Review flagged words and consider using synonyms or rephrasing. Write naturally for users first.',
+            `Review usage of ${overusedWords.slice(0, 3).map(o => `"${o.word}"`).join(', ')} and consider using synonyms or rephrasing. Write naturally for users first.`,
         }
       );
     }

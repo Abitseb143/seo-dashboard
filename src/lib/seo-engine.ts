@@ -93,6 +93,15 @@ function extractCurrentState(result: RuleResult, ruleId: string): string {
         const structure = (d.structure as Array<{ level: number, text: string }>).slice(0, 5);
         snippets.push("Found heading structure:\n" + structure.map(h => `  H${h.level}: ${h.text}`).join("\n"));
     }
+    if (ruleId.includes("keyword-stuffing")) {
+        const overused = (d.overusedWords as any[]) || [];
+        const severe = (d.severelyOverusedWords as any[]) || [];
+        const all = [...severe, ...overused].slice(0, 10);
+        if (all.length > 0) {
+            snippets.push("Overused words found:");
+            all.forEach(item => snippets.push(`  • "${item.word}": ${item.density}% density (${item.count} times)`));
+        }
+    }
 
     return snippets.length > 0 ? snippets.join("\n") : result.message;
 }
