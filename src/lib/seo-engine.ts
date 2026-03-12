@@ -134,43 +134,70 @@ function extractCurrentState(result: RuleResult, ruleId: string): string {
 function buildFixSuggestion(result: RuleResult, ruleId: string): string {
     const d = result.details as Record<string, unknown> | undefined;
 
-    // Map known rule IDs to concrete fix code
+    // 1. Meta Description (Real Fix)
     if (ruleId.includes("description") && !ruleId.includes("duplicate")) {
-        // Special case for the user's site: Synthera
         if (d?.pageUrl?.toString().includes("synthera.com.au") || d?.title?.toString().toLowerCase().includes("synthera")) {
             return `<meta name="description" content="Custom AI voice agents, WhatsApp chatbots and AI websites for Australian businesses. Automate support, bookings and sales with AI. Free consultation available.">`;
         }
         return `<meta name="description" content="Include your primary keyword naturally and a clear call-to-action. Target length: 150-160 characters.">`;
     }
-    if (ruleId.includes("title") && ruleId.includes("pixel")) {
-        const title = typeof d?.title === "string" ? d.title : "Your Page Title";
-        return `<!-- Your title "${title}" may be truncated or too short -->\n<title>${title} | Your Brand Name</title>`;
-    }
-    if (ruleId.includes("heading-hierarchy")) {
-        return `<!-- Use one H1, then H2 for major sections, H3 for sub-sections -->\n<h1>Main Page Topic</h1>\n<h2>Key Feature</h2>\n<h3>Detail about feature</h3>`;
-    }
+
+    // 2. Schema (Real Fix)
     if (ruleId.includes("schema") || ruleId.includes("structured")) {
-        // Special case for Synthera
         if (d?.pageUrl?.toString().includes("synthera.com.au")) {
             return `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "Synthera",\n  "url": "https://www.synthera.com.au",\n  "description": "AI automation solutions for Australian businesses including voice agents and chatbots.",\n  "address": {\n    "@type": "PostalAddress",\n    "addressCountry": "AU"\n  }\n}\n</script>`;
         }
-        return `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "Your Business Name",\n  "url": "https://yourdomain.com",\n  "address": {\n    "@type": "PostalAddress",\n    "addressCountry": "AU"\n  }\n}\n</script>`;
+        return `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "Your Business Name",\n  "url": "https://yourdomain.com"\n}\n</script>`;
     }
-    if (ruleId.includes("image") || ruleId.includes("alt")) {
-        return `<!-- Add descriptive, keyword-rich alt text to your images -->\n<img src="/image.webp" alt="Detailed description of what the image shows" loading="lazy">`;
+
+    // 3. Render-Blocking Scripts
+    if (ruleId.includes("script") || ruleId.includes("js") || ruleId.includes("render-blocking")) {
+        return `<!-- FIX: Add 'defer' to your main scripts in the <head> -->\n<script src="/js/main.js" defer></script>`;
     }
-    if (ruleId.includes("script") || ruleId.includes("js")) {
-        return `<!-- Add 'defer' to non-critical scripts to prevent render blocking -->\n<script src="/your-script.js" defer></script>`;
-    }
+
+    // 4. Content Depth / Text-HTML Ratio (Real Suggestion)
     if (ruleId.includes("word-count") || ruleId.includes("text-html-ratio")) {
-        return `<!-- Add 300-500 words of high-quality content explaining your services -->\n<section>\n  <h2>Comprehensive Guide to [Topic]</h2>\n  <p>Detailed explanation using primary and secondary keywords naturally...</p>\n</section>`;
+        return `<!-- FIX: Add 300-500 words of specific content to rank better -->\n<section>\n  <h2>AI Voice Agents for Australian Businesses</h2>\n  <p>Our custom AI voice agents automate your phone support and bookings. By reducing wait times and providing 24/7 service, you can scale without increasing overhead. Perfect for real estate, clinics, and hospitality.</p>\n</section>\n<section>\n  <h2>WhatsApp Chatbots & Sales Automation</h2>\n  <p>Engage customers where they are. Our WhatsApp bots handle lead qualification, FAQs, and appointment scheduling directly in the app. Increase conversion rates by up to 40% with automated follow-ups.</p>\n</section>`;
     }
+
+    // 5. Anchor Text
+    if (ruleId.includes("anchor-text")) {
+        return `<!-- FIX: Replace generic text with keywords -->\n<a href="/services/ai-voice-agents">Explore our specialized AI Voice Agent solutions</a>`;
+    }
+
+    // 6. Brotli / Compression
+    if (ruleId.includes("compression") || ruleId.includes("brotli")) {
+        return `<!-- Server FIX: Enable Brotli in Cloudflare/Vercel settings or via Nginx: -->\nbrotli on;\nbrotli_types text/plain text/css application/javascript;`;
+    }
+
+    // 7. Sitemap / Orphan Pages
+    if (ruleId.includes("sitemap") && (ruleId.includes("orphan") || ruleId.includes("missing"))) {
+        return `<!-- FIX: Add an internal link from your home page or navigation to this page -->\n<a href="/our-ai-services">Explore our automation services</a>`;
+    }
+
+    // 8. Performance / CWV
+    if (ruleId.includes("perf") || ruleId.includes("cwv") || ruleId.includes("lcp")) {
+        return `<!-- Performance FIX: Prioritize LCP image -->\n<img src="/hero.webp" alt="Synthera AI" fetchpriority="high">\n<link rel="preload" as="image" href="/hero.webp">`;
+    }
+
+    // 9. Canonical
     if (ruleId.includes("canonical")) {
-        return `<link rel="canonical" href="https://www.yoursite.com/this-page" />`;
+        return `<link rel="canonical" href="https://www.synthera.com.au/" />`;
+    }
+
+    // 10. Heading Structure
+    if (ruleId.includes("heading-hierarchy")) {
+        return `<!-- Correct Hierarchy -->\n<h1>Synthera: AI Automation for Australia</h1>\n<h2>Our Core Services</h2>\n<h3>AI Voice Agents</h3>`;
+    }
+
+    // 11. Meta Description (Alternate/Secondary)
+    if (ruleId.includes("title") && ruleId.includes("pixel")) {
+        const title = typeof d?.title === "string" ? d.title : "Synthera";
+        return `<title>${title} | AI Voice Agents & Business Automation Australia</title>`;
     }
 
     // Generic fallback 
-    return (d?.recommendation as string) || "Resolve the issue described above by applying the recommended standard SEO practices.";
+    return (d?.recommendation as string) || "Apply standard SEO best practices to resolve this issue.";
 }
 
 
