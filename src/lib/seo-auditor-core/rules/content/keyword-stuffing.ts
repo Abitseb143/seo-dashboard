@@ -10,10 +10,10 @@ import { getContentWords } from './utils/stopwords';
 /**
  * Keyword density thresholds
  */
-const WARN_DENSITY = 2; // Percentage - start warning
-const FAIL_DENSITY = 5; // Percentage - definite keyword stuffing
-const WARN_COUNT = 2; // Number of words exceeding threshold to warn
-const FAIL_COUNT = 3; // Number of words exceeding threshold to fail
+const WARN_DENSITY = 4; // Percentage - start warning
+const FAIL_DENSITY = 7; // Percentage - definite keyword stuffing
+const WARN_COUNT = 3; // Number of words exceeding threshold to warn
+const FAIL_COUNT = 5; // Number of words exceeding threshold to fail
 const MIN_WORDS_FOR_CHECK = 100; // Need enough text for meaningful analysis
 const MIN_WORD_LENGTH = 3; // Ignore very short words
 

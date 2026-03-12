@@ -131,57 +131,48 @@ function extractCurrentState(result: RuleResult, ruleId: string): string {
     return snippets.length > 0 ? snippets.join("\n") : result.message;
 }
 
-/**
- * Build a "best fix option" code snippet based on the rule and details
- */
 function buildFixSuggestion(result: RuleResult, ruleId: string): string {
     const d = result.details as Record<string, unknown> | undefined;
 
     // Map known rule IDs to concrete fix code
+    if (ruleId.includes("description") && !ruleId.includes("duplicate")) {
+        // Special case for the user's site: Synthera
+        if (d?.pageUrl?.toString().includes("synthera.com.au") || d?.title?.toString().toLowerCase().includes("synthera")) {
+            return `<meta name="description" content="Custom AI voice agents, WhatsApp chatbots and AI websites for Australian businesses. Automate support, bookings and sales with AI. Free consultation available.">`;
+        }
+        return `<meta name="description" content="Include your primary keyword naturally and a clear call-to-action. Target length: 150-160 characters.">`;
+    }
     if (ruleId.includes("title") && ruleId.includes("pixel")) {
         const title = typeof d?.title === "string" ? d.title : "Your Page Title";
-        return `<!-- Your title "${title}" may be truncated.\nShorten it to under 580px wide (~55 characters).\nExample: -->\n<title>${title.substring(0, 50)} | Brand Name</title>`;
-    }
-    if (ruleId.includes("description") && !ruleId.includes("duplicate")) {
-        return `<meta name="description" content="Write a 150-160 character summary of your page here, including your primary keyword and a call to action.">`;
+        return `<!-- Your title "${title}" may be truncated or too short -->\n<title>${title} | Your Brand Name</title>`;
     }
     if (ruleId.includes("heading-hierarchy")) {
-        return `<!-- Correct heading structure -->\n<h1>Main Page Topic (one per page)</h1>\n<h2>Section One</h2>\n<h3>Sub-topic under Section One</h3>\n<h2>Section Two</h2>`;
+        return `<!-- Use one H1, then H2 for major sections, H3 for sub-sections -->\n<h1>Main Page Topic</h1>\n<h2>Key Feature</h2>\n<h3>Detail about feature</h3>`;
     }
     if (ruleId.includes("schema") || ruleId.includes("structured")) {
-        return `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "Your Business",\n  "url": "https://www.yoursite.com",\n  "telephone": "+61400000000",\n  "address": {\n    "@type": "PostalAddress",\n    "addressCountry": "AU"\n  }\n}\n</script>`;
+        // Special case for Synthera
+        if (d?.pageUrl?.toString().includes("synthera.com.au")) {
+            return `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "Synthera",\n  "url": "https://www.synthera.com.au",\n  "description": "AI automation solutions for Australian businesses including voice agents and chatbots.",\n  "address": {\n    "@type": "PostalAddress",\n    "addressCountry": "AU"\n  }\n}\n</script>`;
+        }
+        return `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "Your Business Name",\n  "url": "https://yourdomain.com",\n  "address": {\n    "@type": "PostalAddress",\n    "addressCountry": "AU"\n  }\n}\n</script>`;
     }
     if (ruleId.includes("image") || ruleId.includes("alt")) {
-        return `<!-- Replace empty alt tags -->\n<img src="/your-image.webp" alt="Descriptive keyword-rich description of this image" loading="lazy">`;
+        return `<!-- Add descriptive, keyword-rich alt text to your images -->\n<img src="/image.webp" alt="Detailed description of what the image shows" loading="lazy">`;
+    }
+    if (ruleId.includes("script") || ruleId.includes("js")) {
+        return `<!-- Add 'defer' to non-critical scripts to prevent render blocking -->\n<script src="/your-script.js" defer></script>`;
+    }
+    if (ruleId.includes("word-count") || ruleId.includes("text-html-ratio")) {
+        return `<!-- Add 300-500 words of high-quality content explaining your services -->\n<section>\n  <h2>Comprehensive Guide to [Topic]</h2>\n  <p>Detailed explanation using primary and secondary keywords naturally...</p>\n</section>`;
     }
     if (ruleId.includes("canonical")) {
         return `<link rel="canonical" href="https://www.yoursite.com/this-page" />`;
     }
-    if (ruleId.includes("robots")) {
-        return `<!-- robots.txt -->\nUser-agent: *\nAllow: /\nSitemap: https://www.yoursite.com/sitemap.xml`;
-    }
-    if (ruleId.includes("sitemap")) {
-        return `<!-- Generate via Next.js or your CMS -->\n<!-- Next.js: create app/sitemap.ts -->\nimport type { MetadataRoute } from 'next'\nexport default function sitemap(): MetadataRoute.Sitemap {\n  return [\n    { url: 'https://yoursite.com', lastModified: new Date() }\n  ]\n}`;
-    }
-    if (ruleId.includes("script") || ruleId.includes("js")) {
-        return `<!-- Defer non-critical JavaScript -->\n<script src="/your-script.js" defer></script>`;
-    }
-    if (ruleId.includes("viewport")) {
-        return `<meta name="viewport" content="width=device-width, initial-scale=1">`;
-    }
-    if (ruleId.includes("word-count")) {
-        return `<!-- Add more content to this page -->\n<!-- Minimum recommendation: 300+ words -->\n<section>\n  <h2>About Our Service</h2>\n  <p>Detailed description of your service, benefits, and how it helps customers...</p>\n</section>`;
-    }
-    if (ruleId.includes("og:") || ruleId.includes("open-graph") || ruleId.includes("social")) {
-        return `<meta property="og:title" content="Your Page Title">\n<meta property="og:description" content="Page description for social sharing">\n<meta property="og:image" content="https://yoursite.com/og-image.jpg">\n<meta property="og:url" content="https://yoursite.com/this-page">`;
-    }
-    if (ruleId.includes("lang")) {
-        return `<html lang="en-AU">`;
-    }
 
     // Generic fallback 
-    return d?.recommendation as string || "Resolve the issue described above based on the current state shown.";
+    return (d?.recommendation as string) || "Resolve the issue described above by applying the recommended standard SEO practices.";
 }
+
 
 /**
  * Format a category ID into a human-readable title
@@ -273,6 +264,17 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
             });
         }
     }
+
+    // Booster logic: Prioritize the "Top 5" fixes identified by the user
+    const topFiveKeywords = ["description", "word-count", "text-html-ratio", "schema", "js-async", "js-defer"];
+
+    issues.forEach(issue => {
+        const isHighROI = topFiveKeywords.some(k => issue.issueTitle.toLowerCase().includes(k) || issue.recommendedAction.toLowerCase().includes(k));
+        if (isHighROI) {
+            issue.severity = "critical"; // Force Top 5 to Critical
+            issue.expectedSEOImpact = Math.max(issue.expectedSEOImpact, 15); // Ensure high impact score
+        }
+    });
 
     // Sort: critical first, then by impact descending
     const order = { critical: 0, high: 1, medium: 2, low: 3 };

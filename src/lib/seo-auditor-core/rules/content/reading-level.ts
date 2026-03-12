@@ -32,7 +32,7 @@ export const readingLevelRule = defineRule({
   name: 'Reading Level',
   description: 'Analyzes content readability using Flesch-Kincaid score',
   category: 'content',
-  weight: 3,
+  weight: 1,
   run: async (context: AuditContext) => {
     const { $ } = context;
 

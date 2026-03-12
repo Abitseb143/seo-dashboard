@@ -31,6 +31,10 @@ export const contentLengthRule = defineRule({
       const text = $(el).text().trim();
       const length = text.length;
 
+      // Ignore common footer/navigation headings that are naturally short
+      const ignoreTerms = ['services', 'company', 'contact', 'about', 'links', 'footer', 'navigation'];
+      if (ignoreTerms.includes(text.toLowerCase())) return;
+
       const info: HeadingLengthInfo = { level, text, length };
 
       if (length < MIN_LENGTH && length > 0) {
