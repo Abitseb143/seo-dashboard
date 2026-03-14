@@ -59,12 +59,12 @@ export function pass(
   message: string,
   details?: Record<string, unknown>
 ): RuleResult {
-  return {
+    return {
     ruleId,
     status: 'pass',
     message,
     score: 100,
-    ...(details && { details }),
+    ...(details ? { details } : {}),
   };
 }
 
@@ -80,12 +80,12 @@ export function warn(
   message: string,
   details?: Record<string, unknown>
 ): RuleResult {
-  return {
+    return {
     ruleId,
     status: 'warn',
     message,
     score: 50,
-    ...(details && { details }),
+    ...(details ? { details } : {}),
   };
 }
 
@@ -101,11 +101,11 @@ export function fail(
   message: string,
   details?: Record<string, unknown>
 ): RuleResult {
-  return {
+    return {
     ruleId,
     status: 'fail',
     message,
     score: 0,
-    ...(details && { details }),
+    ...(details ? { details } : {}),
   };
 }

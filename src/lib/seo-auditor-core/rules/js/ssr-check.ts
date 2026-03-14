@@ -61,7 +61,7 @@ export const ssrCheckRule = defineRule({
     let hasJsRequiredNoscript = false;
     let noscriptMessage: string | null = null;
 
-    $('noscript').each((_, el) => {
+    $('noscript').each((_: any, el: any) => {
       const text = $(el).text().trim();
       for (const pattern of NOSCRIPT_JS_PATTERNS) {
         if (pattern.test(text)) {
@@ -90,7 +90,7 @@ export const ssrCheckRule = defineRule({
         'Page appears to be client-side rendered only: empty root element with minimal HTML content',
         {
           ...details,
-          ...(noscriptMessage && { noscriptMessage }),
+          ...(noscriptMessage ? { noscriptMessage } : {}),
           impact: 'Search engines may see an empty page if JavaScript execution fails or is delayed',
           recommendation: 'Implement server-side rendering (SSR) or static site generation (SSG) to include content in initial HTML',
         }
@@ -104,7 +104,7 @@ export const ssrCheckRule = defineRule({
         'Page may rely on client-side rendering: root element has minimal content',
         {
           ...details,
-          ...(noscriptMessage && { noscriptMessage }),
+          ...(noscriptMessage ? { noscriptMessage } : {}),
           recommendation: 'Consider implementing SSR to ensure content is available in the initial HTML response',
         }
       );
