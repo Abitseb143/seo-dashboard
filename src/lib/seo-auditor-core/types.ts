@@ -1,4 +1,4 @@
-import type { CheerioAPI } from 'cheerio';
+// Cheerio types are causing build issues in production environment, using any as a fallback
 
 /**
  * Rule execution status
@@ -160,7 +160,7 @@ export interface AuditContext {
   /** Raw HTML content of the page */
   html: string;
   /** Cheerio instance for DOM querying */
-  $: CheerioAPI;
+  $: any;
   /** HTTP response headers */
   headers: Record<string, string>;
   /** HTTP status code */
@@ -200,7 +200,7 @@ export interface AuditContext {
   /** HTML after JavaScript rendering */
   renderedHtml?: string;
   /** Cheerio instance of rendered DOM */
-  rendered$?: CheerioAPI;
+  rendered$?: any;
 }
 
 /**

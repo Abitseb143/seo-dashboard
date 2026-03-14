@@ -235,7 +235,7 @@ export class Auditor {
     // Get Core Web Vitals and rendered DOM if enabled
     let cwv: CoreWebVitals = {};
     let renderedHtml: string | undefined;
-    let rendered$: import('cheerio').CheerioAPI | undefined;
+    let rendered$: any | undefined;
     if (this.options.measureCwv) {
       const fetcher = this.options.browserFetcher ?? fetchPageWithPlaywright;
       try {
