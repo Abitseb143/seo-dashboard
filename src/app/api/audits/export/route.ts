@@ -30,7 +30,9 @@ export async function GET() {
         );
 
         // Generate PDF using Puppeteer
-        const puppeteer = await import("puppeteer").then(m => m.default || m);
+        // We use a template string for the module name to bypass build-time resolution
+        const moduleName = "puppeteer";
+        const puppeteer = await import(moduleName).then(m => m.default || m);
         const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
         const page = await browser.newPage();
         
