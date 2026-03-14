@@ -131,6 +131,20 @@
         },
         {
             "parameters": {
+                "path": "seo-report-trigger",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Manual Report Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                200,
+                300
+            ]
+        },
+        {
+            "parameters": {
                 "fromEmail": "reports@seofixer.com",
                 "toEmail": "admin@yourcompany.com",
                 "subject": "=Weekly SEO Report - Score: {{$json.overallScore}}",
@@ -148,6 +162,17 @@
         }
     ],
     "connections": {
+        "Manual Report Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Fetch Audit Results",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
         "Schedule Trigger": {
             "main": [
                 [

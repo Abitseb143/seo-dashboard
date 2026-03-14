@@ -2,20 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { FixCard } from "@/components/ui/FixCard";
-import { Download, Loader2 } from "lucide-react";
+import { Mail, Loader2, CheckCircle2 } from "lucide-react";
 
 export default function BestFixesPage() {
     const [issues, setIssues] = useState<any[]>([]);
+    const [auditId, setAuditId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-    const [isDownloading, setIsDownloading] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+    const [sent, setSent] = useState(false);
 
     useEffect(() => {
         async function fetchFixes() {
             try {
                 const res = await fetch("/api/audits/latest");
                 const data = await res.json();
-                if (data.success && data.bestFixes) {
-                    setIssues(data.bestFixes);
+                if (data.success) {
+                    setIssues(data.bestFixes || []);
+                    setAuditId(data.auditId);
                 }
             } catch (e) {
                 console.error("Failed to load best fixes", e);
@@ -26,14 +29,28 @@ export default function BestFixesPage() {
         fetchFixes();
     }, []);
 
-    const handleDownloadPDF = async () => {
-        setIsDownloading(true);
+    const handleEmailReport = async () => {
+        if (!auditId) return;
+        
+        setIsSending(true);
         try {
-            window.open("/api/audits/export", "_blank");
+            const res = await fetch("/api/notifications/export", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ auditId }),
+            });
+            
+            if (res.ok) {
+                setSent(true);
+                setTimeout(() => setSent(false), 5000);
+            } else {
+                alert("Failed to send report request to n8n. Please try again later.");
+            }
         } catch (error) {
-            console.error("Failed to download PDF:", error);
+            console.error("Failed to trigger n8n report:", error);
+            alert("An error occurred while requesting the report.");
         } finally {
-            setIsDownloading(false);
+            setIsSending(false);
         }
     };
 
@@ -47,12 +64,20 @@ export default function BestFixesPage() {
                     </p>
                 </div>
                 <button
-                    onClick={handleDownloadPDF}
-                    disabled={isDownloading || loading || issues.length === 0}
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium rounded-lg transition-colors shadow-sm shadow-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleEmailReport}
+                    disabled={isSending || loading || issues.length === 0 || sent}
+                    className={`flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+                        sent ? 'bg-emerald-600' : 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-200'
+                    }`}
                 >
-                    {isDownloading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                    Download Report PDF
+                    {isSending ? (
+                        <Loader2 size={16} className="animate-spin" />
+                    ) : sent ? (
+                        <CheckCircle2 size={16} />
+                    ) : (
+                        <Mail size={16} />
+                    )}
+                    {sent ? "Report Sent!" : isSending ? "Sending..." : "Email Report PDF"}
                 </button>
             </div>
 
