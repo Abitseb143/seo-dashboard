@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import puppeteer from "puppeteer";
 
 export async function GET() {
     try {
@@ -31,7 +30,8 @@ export async function GET() {
         );
 
         // Generate PDF using Puppeteer
-        const browser = await puppeteer.launch({ headless: true });
+        const puppeteer = await import("puppeteer").then(m => m.default || m);
+        const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
         const page = await browser.newPage();
         
         const escapeHtml = (unsafe: string) => {
