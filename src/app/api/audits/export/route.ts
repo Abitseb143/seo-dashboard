@@ -30,10 +30,21 @@ export async function GET() {
         );
 
         // Generate PDF using Puppeteer
-        // We use a template string for the module name to bypass build-time resolution
-        const moduleName = "puppeteer";
-        const puppeteer = await import(moduleName).then(m => m.default || m);
-        const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+        let puppeteer;
+        try {
+            // Use standard require inside try-catch to satisfy runtime availability
+            puppeteer = require("puppeteer");
+        } catch (e) {
+            // Fallback for build environments or missing module
+            console.error("Puppeteer module could not be loaded directly:", e);
+            const moduleName = "puppeteer";
+            puppeteer = await import(moduleName).then(m => m.default || m);
+        }
+        
+        const browser = await puppeteer.launch({ 
+            headless: true, 
+            args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+        });
         const page = await browser.newPage();
         
         const escapeHtml = (unsafe: string) => {
