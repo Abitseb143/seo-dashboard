@@ -11,16 +11,15 @@ export const pictureElementRule = defineRule({
   category: 'images',
   weight: 10,
   run: (context: AuditContext) => {
-    const { pictureElements } = context;
-
+    const pictureElements = context.pictureElements || [];
     if (pictureElements.length === 0) {
       return pass('images-picture-element', 'No picture elements found on page', {
         pictureCount: 0,
       });
     }
 
-    const missingFallback = pictureElements.filter((p) => !p.hasImgFallback);
-    const noSources = pictureElements.filter((p) => p.sourceCount === 0);
+    const missingFallback = pictureElements.filter((p: any) => !p.hasImgFallback);
+    const noSources = pictureElements.filter((p: any) => p.sourceCount === 0);
 
     const issues: string[] = [];
     if (missingFallback.length > 0) {
@@ -54,8 +53,8 @@ export const pictureElementRule = defineRule({
     }
 
     // Check for modern format usage
-    const withModernFormats = pictureElements.filter((p) =>
-      p.sourceTypes.some((t) => t.includes('webp') || t.includes('avif'))
+    const withModernFormats = pictureElements.filter((p: any) =>
+      p.sourceTypes.some((t: any) => t.includes('webp') || t.includes('avif'))
     );
 
     return pass(

@@ -35,7 +35,7 @@ export const formHttpsRule = defineRule({
 
     const insecureForms: InsecureForm[] = [];
 
-    forms.each((_, el) => {
+    forms.each((_: any, el: any) => {
       const $form = $(el);
       const action = $form.attr('action') || '';
       const method = ($form.attr('method') || 'get').toLowerCase();
@@ -64,7 +64,7 @@ export const formHttpsRule = defineRule({
     }
 
     // POST forms with insecure actions are more critical
-    const hasInsecurePost = insecureForms.some(f => f.method === 'post');
+    const hasInsecurePost = insecureForms.some((f: any) => f.method === 'post');
 
     const message = `${insecureForms.length} form(s) submit to insecure HTTP URLs`;
     const details = {

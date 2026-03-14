@@ -25,7 +25,7 @@ export const focusVisibleRule = defineRule({
     let hasFocusVisibleSupport = false;
 
     // Check inline styles for outline: none
-    $('[style*="outline"]').each((_, el) => {
+    $('[style*="outline"]').each((_: any, el: any) => {
       const $el = $(el);
       const style = $el.attr('style') || '';
 
@@ -43,7 +43,7 @@ export const focusVisibleRule = defineRule({
     });
 
     // Check style tags for problematic focus styles
-    $('style').each((_, el) => {
+    $('style').each((_: any, el: any) => {
       const cssContent = $(el).html() || '';
 
       // Check for outline: none on interactive elements
@@ -126,7 +126,7 @@ export const focusVisibleRule = defineRule({
   },
 });
 
-function isInteractive($el: cheerio.Cheerio<cheerio.Element>): boolean {
+function isInteractive($el: any): boolean {
   const tag = $el.prop('tagName')?.toLowerCase();
   const role = $el.attr('role');
 

@@ -13,7 +13,7 @@ export const externalValidRule = defineRule({
   weight: 1,
   run: async (context: AuditContext) => {
     const { links } = context;
-    const externalLinks = links.filter((link) => !link.isInternal);
+    const externalLinks = links.filter((link: any) => !link.isInternal);
 
     if (externalLinks.length === 0) {
       return pass(

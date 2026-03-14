@@ -15,7 +15,7 @@ function parseHstsHeader(value: string): {
     preload: false,
   };
 
-  const directives = value.split(';').map((d) => d.trim().toLowerCase());
+  const directives = value.split(';').map((d: any) => d.trim().toLowerCase());
 
   for (const directive of directives) {
     if (directive.startsWith('max-age=')) {

@@ -44,7 +44,7 @@ export const brokenRedirectRule = defineRule({
           finalStatusCode: statusCode,
           errorType,
           chainLength: redirectChain.length,
-          chain: redirectChain.map((entry) => ({
+          chain: redirectChain.map((entry: any) => ({
             url: entry.url,
             statusCode: entry.statusCode,
           })),

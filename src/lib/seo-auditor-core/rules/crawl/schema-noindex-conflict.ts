@@ -58,7 +58,7 @@ function hasNoindex($: AuditContext['$'], headers: Record<string, string>): bool
 function extractSchemaTypes($: AuditContext['$']): string[] {
   const types: string[] = [];
 
-  $('script[type="application/ld+json"]').each((_, el) => {
+  $('script[type="application/ld+json"]').each((_: any, el: any) => {
     try {
       const content = $(el).html();
       if (!content) return;
@@ -108,8 +108,8 @@ export const schemaNoindexConflictRule = defineRule({
     const schemaTypes = extractSchemaTypes($);
 
     // Filter to only rich result types
-    const richResultTypes = schemaTypes.filter((type) =>
-      RICH_RESULT_TYPES.some((richType) => type === richType || type.endsWith('/' + richType))
+    const richResultTypes = schemaTypes.filter((type: any) =>
+      RICH_RESULT_TYPES.some((richType: any) => type === richType || type.endsWith('/' + richType))
     );
 
     // No conflict if page is indexable or has no rich result schemas

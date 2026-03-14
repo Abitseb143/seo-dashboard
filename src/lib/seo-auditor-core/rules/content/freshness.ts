@@ -23,7 +23,7 @@ export const freshnessRule = defineRule({
     // 1. Check for Schema.org dates in JSON-LD
     const jsonLdScripts = $('script[type="application/ld+json"]');
 
-    jsonLdScripts.each((_, el) => {
+    jsonLdScripts.each((_: any, el: any) => {
       try {
         const content = $(el).html();
         if (content) {
@@ -57,7 +57,7 @@ export const freshnessRule = defineRule({
 
     // 2. Check for <time> elements with datetime
     const timeElements = $('time[datetime]');
-    timeElements.each((_, el) => {
+    timeElements.each((_: any, el: any) => {
       const datetime = $(el).attr('datetime');
       if (datetime) {
         signals.push({ type: 'HTML time element', value: datetime });
@@ -97,8 +97,7 @@ export const freshnessRule = defineRule({
 
     if (signals.length > 0) {
       // Deduplicate by type
-      const uniqueSignals = signals.filter(
-        (signal, index, arr) => arr.findIndex((s) => s.type === signal.type) === index
+      const uniqueSignals = signals.filter((signal, index: any, arr: any) => arr.findIndex((s: any) => s.type === signal.type) === index
       );
 
       return pass(

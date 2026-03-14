@@ -207,8 +207,7 @@ export const noindexInSitemapRule = defineRule({
     const normalizedCurrentUrl = normalizeUrl(url);
 
     // Check if current URL is in sitemap
-    const isInSitemap = allSitemapUrls.some(
-      (sitemapEntry) => normalizeUrl(sitemapEntry) === normalizedCurrentUrl
+    const isInSitemap = allSitemapUrls.some((sitemapEntry: any) => normalizeUrl(sitemapEntry) === normalizedCurrentUrl
     );
 
     if (isInSitemap) {

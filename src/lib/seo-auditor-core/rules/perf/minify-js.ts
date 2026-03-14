@@ -55,7 +55,7 @@ export const minifyJsRule = defineRule({
     let scriptTagCount = 0;
 
     // Only check inline scripts (without src attribute)
-    $('script:not([src])').each((_, el) => {
+    $('script:not([src])').each((_: number, el: any) => {
       const content = $(el).html() || '';
       // Skip JSON-LD and other non-JS script types
       const type = $(el).attr('type') || '';

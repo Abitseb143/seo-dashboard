@@ -39,57 +39,57 @@ export const mixedContentRule = defineRule({
     const mixedContent: MixedContentItem[] = [];
 
     // Check scripts (active mixed content - blocked by browsers)
-    $('script[src^="http://"]').each((_, el) => {
+    $('script[src^="http://"]').each((_: number, el: any) => {
       const src = $(el).attr('src');
       if (src) mixedContent.push({ type: 'script', url: src });
     });
 
     // Check stylesheets (active mixed content)
-    $('link[rel="stylesheet"][href^="http://"]').each((_, el) => {
+    $('link[rel="stylesheet"][href^="http://"]').each((_: number, el: any) => {
       const href = $(el).attr('href');
       if (href) mixedContent.push({ type: 'stylesheet', url: href });
     });
 
     // Check images (passive mixed content - may show warning)
-    $('img[src^="http://"]').each((_, el) => {
+    $('img[src^="http://"]').each((_: number, el: any) => {
       const src = $(el).attr('src');
       if (src) mixedContent.push({ type: 'image', url: src });
     });
 
     // Check iframes (active mixed content)
-    $('iframe[src^="http://"]').each((_, el) => {
+    $('iframe[src^="http://"]').each((_: number, el: any) => {
       const src = $(el).attr('src');
       if (src) mixedContent.push({ type: 'iframe', url: src });
     });
 
     // Check audio (passive mixed content)
-    $('audio[src^="http://"]').each((_, el) => {
+    $('audio[src^="http://"]').each((_: number, el: any) => {
       const src = $(el).attr('src');
       if (src) mixedContent.push({ type: 'audio', url: src });
     });
-    $('audio source[src^="http://"]').each((_, el) => {
+    $('audio source[src^="http://"]').each((_: number, el: any) => {
       const src = $(el).attr('src');
       if (src) mixedContent.push({ type: 'audio', url: src });
     });
 
     // Check video (passive mixed content)
-    $('video[src^="http://"]').each((_, el) => {
+    $('video[src^="http://"]').each((_: number, el: any) => {
       const src = $(el).attr('src');
       if (src) mixedContent.push({ type: 'video', url: src });
     });
-    $('video source[src^="http://"]').each((_, el) => {
+    $('video source[src^="http://"]').each((_: number, el: any) => {
       const src = $(el).attr('src');
       if (src) mixedContent.push({ type: 'video', url: src });
     });
 
     // Check object (active mixed content)
-    $('object[data^="http://"]').each((_, el) => {
+    $('object[data^="http://"]').each((_: number, el: any) => {
       const data = $(el).attr('data');
       if (data) mixedContent.push({ type: 'object', url: data });
     });
 
     // Check embed (active mixed content)
-    $('embed[src^="http://"]').each((_, el) => {
+    $('embed[src^="http://"]').each((_: number, el: any) => {
       const src = $(el).attr('src');
       if (src) mixedContent.push({ type: 'embed', url: src });
     });
@@ -99,7 +99,7 @@ export const mixedContentRule = defineRule({
     }
 
     // Check if any active mixed content exists
-    const hasActiveMixed = mixedContent.some(item => ACTIVE_TYPES.includes(item.type));
+    const hasActiveMixed = mixedContent.some((item: any) => ACTIVE_TYPES.includes(item.type));
 
     // Group by type for summary
     const byType = mixedContent.reduce((acc, item) => {

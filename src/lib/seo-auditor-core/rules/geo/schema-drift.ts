@@ -37,10 +37,10 @@ function textAppearsIn(target: string, source: string): boolean {
   // (useful for slight rewordings between schema and visible text)
   const targetWords = normalizedTarget
     .split(/\s+/)
-    .filter((w) => w.length > 3);
+    .filter((w: any) => w.length > 3);
   if (targetWords.length === 0) return false;
 
-  const matchedWords = targetWords.filter((w) => source.includes(w));
+  const matchedWords = targetWords.filter((w: any) => source.includes(w));
   const matchRatio = matchedWords.length / targetWords.length;
 
   // At least 60% of significant words must appear
@@ -110,7 +110,7 @@ export const schemaDriftRule = defineRule({
 
     const schemas: Array<Record<string, unknown>> = [];
 
-    jsonLdScripts.each((_, el) => {
+    jsonLdScripts.each((_: any, el: any) => {
       const raw = $(el).html();
       if (!raw) return;
       try {
@@ -200,15 +200,15 @@ export const schemaDriftRule = defineRule({
       );
     }
 
-    const driftChecks = checks.filter((c) => !c.foundOnPage);
-    const consistentChecks = checks.filter((c) => c.foundOnPage);
+    const driftChecks = checks.filter((c: any) => !c.foundOnPage);
+    const consistentChecks = checks.filter((c: any) => c.foundOnPage);
 
     const details: Record<string, unknown> = {
       jsonLdCount: jsonLdScripts.length,
       parsedSchemas: schemas.length,
       totalChecks: checks.length,
-      consistentFields: consistentChecks.map((c) => c.field),
-      driftFields: driftChecks.map((c) => ({
+      consistentFields: consistentChecks.map((c: any) => c.field),
+      driftFields: driftChecks.map((c: any) => ({
         field: c.field,
         schemaValue: c.schemaValue,
       })),
@@ -236,7 +236,7 @@ export const schemaDriftRule = defineRule({
 
     return warn(
       'geo-schema-drift',
-      `${driftChecks.length} schema field(s) don't match visible content: ${driftChecks.map((c) => c.field).join(', ')}`,
+      `${driftChecks.length} schema field(s) don't match visible content: ${driftChecks.map((c: any) => c.field).join(', ')}`,
       {
         ...details,
         recommendation:

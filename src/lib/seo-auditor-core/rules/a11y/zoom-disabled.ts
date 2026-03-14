@@ -51,7 +51,7 @@ export const zoomDisabledRule = defineRule({
     // Check for minimum-scale = maximum-scale = 1 (locked zoom)
     const minScale = parseFloat(directives['minimum-scale'] || '0');
     if (!isNaN(minScale) && !isNaN(maxScale) && minScale === 1 && maxScale === 1) {
-      if (!issues.some((i) => i.includes('maximum-scale'))) {
+      if (!issues.some((i: any) => i.includes('maximum-scale'))) {
         issues.push('Zoom is locked at 100% (minimum-scale and maximum-scale both 1)');
       }
     }
@@ -85,7 +85,7 @@ function parseViewportContent(content: string): Record<string, string> {
   const parts = content.split(/[,;]/);
 
   for (const part of parts) {
-    const [key, value] = part.split('=').map((s) => s.trim().toLowerCase());
+    const [key, value] = part.split('=').map((s: any) => s.trim().toLowerCase());
     if (key) {
       directives[key] = value || '';
     }

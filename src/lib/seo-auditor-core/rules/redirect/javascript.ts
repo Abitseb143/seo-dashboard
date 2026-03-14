@@ -32,7 +32,7 @@ export const javascriptRedirectRule = defineRule({
     const { $ } = context;
 
     const inlineScripts: string[] = [];
-    $('script:not([src])').each((_, el) => {
+    $('script:not([src])').each((_: any, el: any) => {
       const text = $(el).text();
       if (text.trim()) {
         inlineScripts.push(text);

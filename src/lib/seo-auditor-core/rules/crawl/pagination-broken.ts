@@ -73,7 +73,7 @@ export const paginationBrokenRule = defineRule({
     };
 
     if (issues.length > 0) {
-      const brokenRels = issues.map((i) => `rel="${i.rel}"`).join(' and ');
+      const brokenRels = issues.map((i: any) => `rel="${i.rel}"`).join(' and ');
       return fail(
         'crawl-pagination-broken',
         `Pagination ${brokenRels} link(s) have invalid URLs`,
@@ -85,7 +85,7 @@ export const paginationBrokenRule = defineRule({
       );
     }
 
-    const validRels = validLinks.map((l) => `rel="${l.rel}"`).join(' and ');
+    const validRels = validLinks.map((l: any) => `rel="${l.rel}"`).join(' and ');
     return pass(
       'crawl-pagination-broken',
       `Pagination ${validRels} link(s) have valid URLs`,

@@ -21,7 +21,7 @@ export const nosnippetRule = defineRule({
 
     // Check meta robots tags
     const robotsMeta = $('meta[name="robots"]');
-    robotsMeta.each((_, el) => {
+    robotsMeta.each((_: any, el: any) => {
       const content = $(el).attr('content')?.toLowerCase() || '';
       directives.push(content);
 
@@ -38,7 +38,7 @@ export const nosnippetRule = defineRule({
 
     // Check googlebot-specific meta tag
     const googlebotMeta = $('meta[name="googlebot"]');
-    googlebotMeta.each((_, el) => {
+    googlebotMeta.each((_: any, el: any) => {
       const content = $(el).attr('content')?.toLowerCase() || '';
       directives.push(`googlebot: ${content}`);
 

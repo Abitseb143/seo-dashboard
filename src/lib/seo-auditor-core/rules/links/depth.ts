@@ -28,7 +28,7 @@ export const depthRule = defineRule({
       const segments = pathname
         .replace(/^\/+|\/+$/g, '') // Remove leading/trailing slashes
         .split('/')
-        .filter((segment) => segment.length > 0); // Remove empty segments
+        .filter((segment: any) => segment.length > 0); // Remove empty segments
 
       depth = segments.length;
     } catch {

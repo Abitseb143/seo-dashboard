@@ -34,8 +34,8 @@ export const noscriptInHeadRule = defineRule({
 
     const invalidElements: string[] = [];
 
-    headNoscripts.each((_, noscript) => {
-      $(noscript).children().each((_, child) => {
+    headNoscripts.each((_: any, noscript: any) => {
+      $(noscript).children().each((_: any, child: any) => {
         if (child.type === 'tag') {
           const tagName = child.tagName.toLowerCase();
           if (!PERMITTED_NOSCRIPT_HEAD_ELEMENTS.has(tagName)) {

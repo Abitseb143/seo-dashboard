@@ -11,16 +11,15 @@ export const figureCaptionsRule = defineRule({
   category: 'images',
   weight: 5,
   run: (context: AuditContext) => {
-    const { figures } = context;
-
+    const figures = context.figures || [];
     if (figures.length === 0) {
       return pass('images-figure-captions', 'No figure elements found on page', {
         figureCount: 0,
       });
     }
 
-    const withoutCaptions = figures.filter((f) => !f.hasFigcaption);
-    const emptyFigures = figures.filter((f) => f.imageCount === 0);
+    const withoutCaptions = figures.filter((f: any) => !f.hasFigcaption);
+    const emptyFigures = figures.filter((f: any) => f.imageCount === 0);
 
     const issues: string[] = [];
     if (withoutCaptions.length > 0) {

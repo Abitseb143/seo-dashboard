@@ -42,7 +42,7 @@ export const hreflangReturnLinksRule = defineRule({
       });
     }
 
-    hreflangElements.each((_, el) => {
+    hreflangElements.each((_: any, el: any) => {
       const $el = $(el);
       const hreflang = $el.attr('hreflang') || '';
       const href = $el.attr('href') || '';

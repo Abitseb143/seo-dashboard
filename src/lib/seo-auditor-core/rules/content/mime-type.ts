@@ -33,7 +33,7 @@ export const mimeTypeRule = defineRule({
     }
 
     // Parse Content-Type value
-    const parts = contentType.toLowerCase().split(';').map((s) => s.trim());
+    const parts = contentType.toLowerCase().split(';').map((s: any) => s.trim());
     const mimeType = parts[0];
 
     // Check MIME type
@@ -48,7 +48,7 @@ export const mimeTypeRule = defineRule({
     }
 
     // Check for charset
-    const charsetPart = parts.find((p) => p.startsWith('charset='));
+    const charsetPart = parts.find((p: any) => p.startsWith('charset='));
     const charset = charsetPart?.replace('charset=', '').trim();
 
     if (!charset) {

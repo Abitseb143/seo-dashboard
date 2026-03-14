@@ -18,8 +18,8 @@ export const redirectChainsRule = defineRule({
     const { links } = context;
 
     // Get unique internal links
-    const internalLinks = links.filter((link) => link.isInternal);
-    const uniqueUrls = [...new Set(internalLinks.map((l) => l.href))];
+    const internalLinks = links.filter((link: any) => link.isInternal);
+    const uniqueUrls = [...new Set(internalLinks.map((l: any) => l.href))];
 
     if (uniqueUrls.length === 0) {
       return pass(
@@ -70,8 +70,8 @@ export const redirectChainsRule = defineRule({
     }
 
     // Separate by severity
-    const longChains = redirectingLinks.filter((l) => l.redirectCount >= 3);
-    const shortChains = redirectingLinks.filter((l) => l.redirectCount < 3);
+    const longChains = redirectingLinks.filter((l: any) => l.redirectCount >= 3);
+    const shortChains = redirectingLinks.filter((l: any) => l.redirectCount < 3);
 
     // Fail if any chains have 3+ redirects
     if (longChains.length > 0) {
@@ -83,7 +83,7 @@ export const redirectChainsRule = defineRule({
           totalInternalLinks: uniqueUrls.length,
           longChainCount: longChains.length,
           shortChainCount: shortChains.length,
-          longChains: longChains.slice(0, 5).map((l) => ({
+          longChains: longChains.slice(0, 5).map((l: any) => ({
             url: l.url,
             finalUrl: l.finalUrl,
             redirectCount: l.redirectCount,
@@ -102,7 +102,7 @@ export const redirectChainsRule = defineRule({
         totalChecked: sampleSize,
         totalInternalLinks: uniqueUrls.length,
         redirectingLinkCount: shortChains.length,
-        redirectingLinks: shortChains.slice(0, 10).map((l) => ({
+        redirectingLinks: shortChains.slice(0, 10).map((l: any) => ({
           url: l.url,
           finalUrl: l.finalUrl,
           redirectCount: l.redirectCount,

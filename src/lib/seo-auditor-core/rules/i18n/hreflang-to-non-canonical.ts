@@ -60,7 +60,7 @@ export const hreflangToNonCanonicalRule = defineRule({
     // Find the hreflang entry that points to the current page (self-reference)
     const mismatches: Array<{ hreflang: string; href: string }> = [];
 
-    hreflangElements.each((_, el) => {
+    hreflangElements.each((_: any, el: any) => {
       const $el = $(el);
       const hreflang = $el.attr('hreflang') || '';
       const href = $el.attr('href') || '';

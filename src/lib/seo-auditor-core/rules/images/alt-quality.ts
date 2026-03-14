@@ -53,7 +53,7 @@ export const altQualityRule = defineRule({
     const { images } = context;
 
     // Only check images that have alt attributes
-    const imagesWithAlt = images.filter((img) => img.hasAlt);
+    const imagesWithAlt = images.filter((img: any) => img.hasAlt);
 
     if (imagesWithAlt.length === 0) {
       return pass(
@@ -98,8 +98,7 @@ export const altQualityRule = defineRule({
       }
 
       // Check for generic patterns
-      const isGeneric = GENERIC_ALT_PATTERNS.some(
-        (pattern) => alt === pattern || alt.startsWith(pattern + ' ')
+      const isGeneric = GENERIC_ALT_PATTERNS.some((pattern: any) => alt === pattern || alt.startsWith(pattern + ' ')
       );
 
       if (isGeneric) {

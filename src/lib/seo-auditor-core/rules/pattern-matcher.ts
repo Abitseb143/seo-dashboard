@@ -43,7 +43,7 @@ export function matchesPattern(ruleId: string, pattern: string): boolean {
  * @returns true if the rule matches any pattern
  */
 export function matchesAnyPattern(ruleId: string, patterns: string[]): boolean {
-  return patterns.some(pattern => matchesPattern(ruleId, pattern));
+  return patterns.some((pattern: any) => matchesPattern(ruleId, pattern));
 }
 
 /**
@@ -89,7 +89,7 @@ export function filterRules(
   enable: string[],
   disable: string[]
 ): string[] {
-  return ruleIds.filter(ruleId => isRuleEnabled(ruleId, enable, disable));
+  return ruleIds.filter((ruleId: any) => isRuleEnabled(ruleId, enable, disable));
 }
 
 /**

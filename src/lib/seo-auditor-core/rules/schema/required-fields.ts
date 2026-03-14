@@ -115,7 +115,7 @@ function extractTypedItems(data: unknown): Array<{ type: string; fields: string[
       ? (obj['@type'] as string[])
       : [obj['@type'] as string];
 
-    const fields = Object.keys(obj).filter((k) => !k.startsWith('@'));
+    const fields = Object.keys(obj).filter((k: any) => !k.startsWith('@'));
 
     for (const type of types) {
       items.push({ type, fields });
@@ -161,7 +161,7 @@ export const structuredDataRequiredFieldsRule = defineRule({
     let typesChecked = 0;
     let unknownTypes = 0;
 
-    jsonLdScripts.each((index, element) => {
+    jsonLdScripts.each((index: number, element: any) => {
       const rawContent = $(element).html() || '';
       const trimmedContent = rawContent.trim();
 
@@ -183,11 +183,9 @@ export const structuredDataRequiredFieldsRule = defineRule({
 
           typesChecked++;
 
-          const missingRequired = typeSpec.required.filter(
-            (field) => !item.fields.includes(field)
+          const missingRequired = typeSpec.required.filter((field: any) => !item.fields.includes(field)
           );
-          const missingRecommended = typeSpec.recommended.filter(
-            (field) => !item.fields.includes(field)
+          const missingRecommended = typeSpec.recommended.filter((field: any) => !item.fields.includes(field)
           );
 
           totalMissingRequired += missingRequired.length;
@@ -223,13 +221,11 @@ export const structuredDataRequiredFieldsRule = defineRule({
       );
     }
 
-    const typesWithMissingRequired = validations.filter(
-      (v) => v.missingRequired.length > 0
+    const typesWithMissingRequired = validations.filter((v: any) => v.missingRequired.length > 0
     );
 
     if (typesWithMissingRequired.length > 0) {
-      const issues = typesWithMissingRequired.map(
-        (v) => `${v.type}: missing ${v.missingRequired.join(', ')}`
+      const issues = typesWithMissingRequired.map((v: any) => `${v.type}: missing ${v.missingRequired.join(', ')}`
       );
 
       return fail(
@@ -239,7 +235,7 @@ export const structuredDataRequiredFieldsRule = defineRule({
           typesChecked,
           totalMissingRequired,
           totalMissingRecommended,
-          validations: validations.map((v) => ({
+          validations: validations.map((v: any) => ({
             type: v.type,
             missingRequired: v.missingRequired,
             missingRecommended: v.missingRecommended,
@@ -250,8 +246,8 @@ export const structuredDataRequiredFieldsRule = defineRule({
 
     if (totalMissingRecommended > 0) {
       const recommendations = validations
-        .filter((v) => v.missingRecommended.length > 0)
-        .map((v) => `${v.type}: consider adding ${v.missingRecommended.join(', ')}`);
+        .filter((v: any) => v.missingRecommended.length > 0)
+        .map((v: any) => `${v.type}: consider adding ${v.missingRecommended.join(', ')}`);
 
       return warn(
         'schema-required-fields',
@@ -261,7 +257,7 @@ export const structuredDataRequiredFieldsRule = defineRule({
           totalMissingRequired: 0,
           totalMissingRecommended,
           recommendations,
-          validations: validations.map((v) => ({
+          validations: validations.map((v: any) => ({
             type: v.type,
             missingRequired: v.missingRequired,
             missingRecommended: v.missingRecommended,
@@ -277,7 +273,7 @@ export const structuredDataRequiredFieldsRule = defineRule({
         typesChecked,
         totalMissingRequired: 0,
         totalMissingRecommended: 0,
-        validations: validations.map((v) => ({
+        validations: validations.map((v: any) => ({
           type: v.type,
           presentFields: v.presentFields,
         })),

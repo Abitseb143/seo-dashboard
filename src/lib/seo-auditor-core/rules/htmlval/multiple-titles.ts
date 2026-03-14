@@ -29,7 +29,7 @@ export const multipleTitlesRule = defineRule({
     }
 
     const titles: string[] = [];
-    $('title').each((_, el) => {
+    $('title').each((_: any, el: any) => {
       titles.push($(el).text().trim());
     });
 

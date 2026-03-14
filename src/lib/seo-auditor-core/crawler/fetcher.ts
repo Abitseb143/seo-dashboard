@@ -1,5 +1,5 @@
+// Cheerio types are causing build issues in production environment, using any as a fallback
 import * as cheerio from 'cheerio';
-import type { CheerioAPI } from 'cheerio';
 import type {
   AuditContext,
   LinkInfo,
@@ -19,7 +19,7 @@ export interface FetchResult {
   /** Raw HTML content */
   html: string;
   /** Cheerio instance for DOM querying */
-  $: CheerioAPI;
+  $: any;
   /** HTTP response headers */
   headers: Record<string, string>;
   /** HTTP status code */
@@ -114,18 +114,12 @@ interface LinkExtractionResult {
   invalidLinks: InvalidLinkInfo[];
 }
 
-/**
- * Extract links from parsed HTML
- * @param $ - Cheerio instance
- * @param baseUrl - Base URL for resolving relative links
- * @returns Object with valid links and invalid links
- */
-function extractLinks($: CheerioAPI, baseUrl: string): LinkExtractionResult {
+function extractLinks($: any, baseUrl: string): LinkExtractionResult {
   const links: LinkInfo[] = [];
   const invalidLinks: InvalidLinkInfo[] = [];
   const baseUrlObj = new URL(baseUrl);
 
-  $('a[href]').each((_, element) => {
+  $('a[href]').each((_: any, element: any) => {
     const $el = $(element);
     const href = $el.attr('href');
     const text = ($el.text().trim() || $el.attr('title') || '').slice(0, 200);
@@ -216,15 +210,10 @@ function isValidPhone(phone: string): { isValid: boolean; issue?: string } {
   return { isValid: true };
 }
 
-/**
- * Extract special protocol links (tel:, mailto:) from parsed HTML
- * @param $ - Cheerio instance
- * @returns Array of SpecialLinkInfo objects
- */
-function extractSpecialLinks($: CheerioAPI): SpecialLinkInfo[] {
+function extractSpecialLinks($: any): SpecialLinkInfo[] {
   const specialLinks: SpecialLinkInfo[] = [];
 
-  $('a[href]').each((_, element) => {
+  $('a[href]').each((_: any, element: any) => {
     const $el = $(element);
     const href = $el.attr('href');
     if (!href) return;
@@ -271,10 +260,10 @@ function extractSpecialLinks($: CheerioAPI): SpecialLinkInfo[] {
  * @param baseUrl - Base URL for resolving relative image sources
  * @returns Array of ImageInfo objects
  */
-function extractImages($: CheerioAPI, baseUrl: string): ImageInfo[] {
+function extractImages($: any, baseUrl: string): ImageInfo[] {
   const images: ImageInfo[] = [];
 
-  $('img').each((_, element) => {
+  $('img').each((_: any, element: any) => {
     const $el = $(element);
     const src = $el.attr('src') || $el.attr('data-src') || '';
 
@@ -311,10 +300,10 @@ function extractImages($: CheerioAPI, baseUrl: string): ImageInfo[] {
  * @param $ - Cheerio instance
  * @returns Array of FigureInfo objects
  */
-function extractFigures($: CheerioAPI): FigureInfo[] {
+function extractFigures($: any): FigureInfo[] {
   const figures: FigureInfo[] = [];
 
-  $('figure').each((_, element) => {
+  $('figure').each((_: any, element: any) => {
     const $el = $(element);
     const $figcaption = $el.find('figcaption');
 
@@ -333,10 +322,10 @@ function extractFigures($: CheerioAPI): FigureInfo[] {
  * @param $ - Cheerio instance
  * @returns Array of InlineSvgInfo objects
  */
-function extractInlineSvgs($: CheerioAPI): InlineSvgInfo[] {
+function extractInlineSvgs($: any): InlineSvgInfo[] {
   const svgs: InlineSvgInfo[] = [];
 
-  $('svg').each((_, element) => {
+  $('svg').each((_: any, element: any) => {
     const $el = $(element);
     const html = $.html($el);
 
@@ -356,16 +345,16 @@ function extractInlineSvgs($: CheerioAPI): InlineSvgInfo[] {
  * @param $ - Cheerio instance
  * @returns Array of PictureElementInfo objects
  */
-function extractPictureElements($: CheerioAPI): PictureElementInfo[] {
+function extractPictureElements($: any): PictureElementInfo[] {
   const pictures: PictureElementInfo[] = [];
 
-  $('picture').each((_, element) => {
+  $('picture').each((_: any, element: any) => {
     const $el = $(element);
     const $img = $el.find('img');
     const $sources = $el.find('source');
 
     const sourceTypes: string[] = [];
-    $sources.each((_, source) => {
+    $sources.each((_: any, source: any) => {
       const type = $(source).attr('type');
       if (type) sourceTypes.push(type);
     });

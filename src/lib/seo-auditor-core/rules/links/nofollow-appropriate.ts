@@ -53,7 +53,7 @@ export const nofollowAppropriateRule = defineRule({
       // Check for internal links with nofollow (usually unnecessary)
       if (link.isInternal && link.isNoFollow) {
         // Check if it might be UGC
-        const isLikelyUgc = UGC_PATTERNS.some((pattern) =>
+        const isLikelyUgc = UGC_PATTERNS.some((pattern: any) =>
           link.href.toLowerCase().includes(pattern)
         );
 
@@ -84,8 +84,8 @@ export const nofollowAppropriateRule = defineRule({
       'Nofollow attributes appear to be used appropriately',
       {
         totalLinks: links.length,
-        externalNofollow: links.filter((l) => !l.isInternal && l.isNoFollow).length,
-        internalNofollow: links.filter((l) => l.isInternal && l.isNoFollow).length,
+        externalNofollow: links.filter((l: any) => !l.isInternal && l.isNoFollow).length,
+        internalNofollow: links.filter((l: any) => l.isInternal && l.isNoFollow).length,
       }
     );
   },

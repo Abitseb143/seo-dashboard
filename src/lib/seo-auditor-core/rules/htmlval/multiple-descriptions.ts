@@ -30,7 +30,7 @@ export const multipleDescriptionsRule = defineRule({
     }
 
     const values: string[] = [];
-    descriptions.each((_, el) => {
+    descriptions.each((_: any, el: any) => {
       values.push($(el).attr('content') || '');
     });
 

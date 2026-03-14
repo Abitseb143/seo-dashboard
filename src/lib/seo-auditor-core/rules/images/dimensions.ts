@@ -45,9 +45,9 @@ export const dimensionsRule = defineRule({
       const percentage = ((missingDimensions.length / images.length) * 100).toFixed(1);
 
       // Categorize the issues
-      const missingBoth = missingDimensions.filter((d) => !d.hasWidth && !d.hasHeight);
-      const missingWidth = missingDimensions.filter((d) => !d.hasWidth && d.hasHeight);
-      const missingHeight = missingDimensions.filter((d) => d.hasWidth && !d.hasHeight);
+      const missingBoth = missingDimensions.filter((d: any) => !d.hasWidth && !d.hasHeight);
+      const missingWidth = missingDimensions.filter((d: any) => !d.hasWidth && d.hasHeight);
+      const missingHeight = missingDimensions.filter((d: any) => d.hasWidth && !d.hasHeight);
 
       return warn(
         'images-dimensions',

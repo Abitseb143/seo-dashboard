@@ -38,7 +38,7 @@ export const altLengthRule = defineRule({
     const { images } = context;
 
     // Only check images that have alt text
-    const imagesWithAlt = images.filter((img) => img.hasAlt && img.alt.trim().length > 0);
+    const imagesWithAlt = images.filter((img: any) => img.hasAlt && img.alt.trim().length > 0);
 
     if (imagesWithAlt.length === 0) {
       return pass(
@@ -81,8 +81,8 @@ export const altLengthRule = defineRule({
       );
     }
 
-    const excessiveCount = issues.filter((i) => i.severity === 'excessive').length;
-    const longCount = issues.filter((i) => i.severity === 'long').length;
+    const excessiveCount = issues.filter((i: any) => i.severity === 'excessive').length;
+    const longCount = issues.filter((i: any) => i.severity === 'long').length;
 
     // Excessive alt text (>250 chars) is a fail
     if (excessiveCount > 0) {

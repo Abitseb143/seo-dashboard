@@ -1,5 +1,5 @@
 import type { AuditContext, RuleResult } from '../../types';
-import { defineRule } from '../define-rule';
+import { defineRule, pass, warn } from '../define-rule';
 
 /**
  * Terms of service link detection patterns
@@ -64,7 +64,7 @@ export const termsOfServiceRule = defineRule({
     const foundLinks: Array<{ href: string; text: string; location: string }> = [];
 
     // Check all links
-    $('a[href]').each((_, el) => {
+    $('a[href]').each((_: any, el: any) => {
       const href = $(el).attr('href') || '';
       const text = $(el).text().trim();
       const ariaLabel = $(el).attr('aria-label') || '';
@@ -101,52 +101,37 @@ export const termsOfServiceRule = defineRule({
     });
 
     if (foundLinks.length > 0) {
-      const inFooter = foundLinks.some((link) => link.location === 'footer');
+      const inFooter = foundLinks.some((link: any) => link.location === 'footer');
 
-      return {
-        status: 'pass',
-        score: 100,
-        message: `Terms of service link found${inFooter ? ' in footer' : ''} (${foundLinks.length} link${foundLinks.length > 1 ? 's' : ''})`,
-        details: {
-          hasTermsOfService: true,
-          inFooter,
-          links: foundLinks.slice(0, 3),
-        },
-      };
+      return pass('eeat-terms-of-service', `Terms of service link found${inFooter ? ' in footer' : ''} (${foundLinks.length} link${foundLinks.length > 1 ? 's' : ''})`, {
+        hasTermsOfService: true,
+        inFooter,
+        links: foundLinks.slice(0, 3),
+      });
     }
 
     // Check if site likely needs ToS (e-commerce, SaaS indicators)
     const likelyNeedsToS = detectSiteType($);
 
     if (likelyNeedsToS) {
-      return {
-        status: 'warn',
-        score: 50,
-        message: 'No terms of service link found - recommended for this site type',
-        details: {
-          hasTermsOfService: false,
-          siteType: likelyNeedsToS,
-          recommendation: 'Add a link to your terms of service in the footer of every page',
-        },
-      };
+      return warn('eeat-terms-of-service', 'No terms of service link found - recommended for this site type', {
+        hasTermsOfService: false,
+        siteType: likelyNeedsToS,
+        recommendation: 'Add a link to your terms of service in the footer of every page',
+      });
     }
 
     // No ToS link found, but may not be critical
-    return {
-      status: 'pass',
-      score: 100,
-      message: 'No terms of service link found (may not be required for this site type)',
-      details: {
-        hasTermsOfService: false,
-      },
-    };
+    return pass('eeat-terms-of-service', 'No terms of service link found (may not be required for this site type)', {
+      hasTermsOfService: false,
+    });
   },
 });
 
 /**
  * Detect if element is in header, footer, or main content
  */
-function detectLocation($: cheerio.CheerioAPI, el: cheerio.Element): string {
+function detectLocation($: any, el: any): string {
   const parents = $(el).parents();
 
   for (let i = 0; i < parents.length; i++) {
@@ -189,7 +174,7 @@ function detectLocation($: cheerio.CheerioAPI, el: cheerio.Element): string {
 /**
  * Detect if the site likely needs a ToS based on content indicators
  */
-function detectSiteType($: cheerio.CheerioAPI): string | null {
+function detectSiteType($: any): string | null {
   // E-commerce indicators
   const hasEcommerce = $(
     '[class*="cart"], [class*="checkout"], [class*="add-to-cart"], [class*="buy-now"], [class*="product-price"], form[action*="checkout"], button:contains("Add to Cart"), button:contains("Buy Now")'

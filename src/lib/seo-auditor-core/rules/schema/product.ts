@@ -61,7 +61,7 @@ export const structuredDataProductRule = defineRule({
               'https://schema.org/PreOrder', 'https://schema.org/BackOrder',
             ];
             const avail = String(o.availability);
-            const isValid = validAvailability.some((v) => avail.includes(v.replace('https://schema.org/', '')));
+            const isValid = validAvailability.some((v: any) => avail.includes(v.replace('https://schema.org/', '')));
             if (!isValid) {
               warnings.push('availability should use schema.org ItemAvailability values');
             }

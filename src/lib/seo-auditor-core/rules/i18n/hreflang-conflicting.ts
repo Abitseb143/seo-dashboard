@@ -34,7 +34,7 @@ export const hreflangConflictingRule = defineRule({
     // Group hreflang entries by language code
     const langToUrls = new Map<string, Set<string>>();
 
-    hreflangElements.each((_, el) => {
+    hreflangElements.each((_: any, el: any) => {
       const $el = $(el);
       const hreflang = ($el.attr('hreflang') || '').trim().toLowerCase();
       const href = ($el.attr('href') || '').trim();

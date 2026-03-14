@@ -175,7 +175,7 @@ export function isStopword(word: string): boolean {
  * Remove stopwords from an array of words
  */
 export function removeStopwords(words: string[]): string[] {
-  return words.filter((word) => !isStopword(word));
+  return words.filter((word: any) => !isStopword(word));
 }
 
 /**
@@ -183,5 +183,5 @@ export function removeStopwords(words: string[]): string[] {
  * Also filters out very short words (< 2 chars)
  */
 export function getContentWords(words: string[]): string[] {
-  return words.filter((word) => word.length >= 2 && !isStopword(word));
+  return words.filter((word: any) => word.length >= 2 && !isStopword(word));
 }

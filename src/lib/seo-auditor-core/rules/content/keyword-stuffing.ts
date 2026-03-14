@@ -50,8 +50,7 @@ export const keywordStuffingRule = defineRule({
     }
 
     // Filter to content words only (remove stopwords)
-    const contentWords = getContentWords(allWords).filter(
-      (w) => w.length >= MIN_WORD_LENGTH
+    const contentWords = getContentWords(allWords).filter((w: any) => w.length >= MIN_WORD_LENGTH
     );
 
     if (contentWords.length === 0) {
@@ -145,7 +144,7 @@ export const keywordStuffingRule = defineRule({
           impact:
             'High keyword density may appear unnatural to search engines',
           recommendation:
-            `Review usage of ${overusedWords.slice(0, 3).map(o => `"${o.word}"`).join(', ')} and consider using synonyms or rephrasing. Write naturally for users first.`,
+            `Review usage of ${overusedWords.slice(0, 3).map((o: any) => `"${o.word}"`).join(', ')} and consider using synonyms or rephrasing. Write naturally for users first.`,
         }
       );
     }

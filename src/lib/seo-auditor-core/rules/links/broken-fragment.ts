@@ -77,7 +77,7 @@ export const brokenFragmentRule = defineRule({
     }
 
     // De-duplicate fragments to avoid checking the same ID multiple times
-    const uniqueFragments = [...new Set(fragmentLinks.map((f) => f.fragment))];
+    const uniqueFragments = [...new Set(fragmentLinks.map((f: any) => f.fragment))];
     const brokenFragments: string[] = [];
 
     for (const fragment of uniqueFragments) {
@@ -93,7 +93,7 @@ export const brokenFragmentRule = defineRule({
     if (brokenFragments.length > 0) {
       // Map broken fragments back to the full hrefs for actionable details
       const brokenLinks = fragmentLinks
-        .filter((f) => brokenFragments.includes(f.fragment))
+        .filter((f: any) => brokenFragments.includes(f.fragment))
         .slice(0, 5);
 
       return warn(
@@ -103,7 +103,7 @@ export const brokenFragmentRule = defineRule({
           brokenCount: brokenFragments.length,
           totalFragmentLinks: fragmentLinks.length,
           brokenFragments: brokenFragments.slice(0, 5),
-          brokenLinks: brokenLinks.map((l) => ({
+          brokenLinks: brokenLinks.map((l: any) => ({
             href: l.href,
             fragment: l.fragment,
           })),

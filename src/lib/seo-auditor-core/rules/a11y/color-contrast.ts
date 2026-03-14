@@ -32,7 +32,7 @@ export const colorContrastRule = defineRule({
     const issues: ContrastIssue[] = [];
 
     // Check for text elements with inline styles that may have low contrast
-    $('[style*="color"]').each((_, el) => {
+    $('[style*="color"]').each((_: any, el: any) => {
       const $el = $(el);
       const style = $el.attr('style') || '';
 
@@ -59,7 +59,7 @@ export const colorContrastRule = defineRule({
     });
 
     // Check for light gray text (common issue)
-    $('[style*="color"]').each((_, el) => {
+    $('[style*="color"]').each((_: any, el: any) => {
       const $el = $(el);
       const style = $el.attr('style') || '';
       const colorMatch = style.match(/(?:^|;)\s*color\s*:\s*([^;]+)/i);
@@ -79,7 +79,7 @@ export const colorContrastRule = defineRule({
     });
 
     // Check for text on background images without fallback color
-    $('[style*="background-image"]').each((_, el) => {
+    $('[style*="background-image"]').each((_: any, el: any) => {
       const $el = $(el);
       const style = $el.attr('style') || '';
       const text = $el.text().trim();

@@ -1,5 +1,5 @@
 import type { AuditContext, RuleResult } from '../../types';
-import { defineRule } from '../define-rule';
+import { defineRule, pass, warn } from '../define-rule';
 
 /**
  * Affiliate link patterns
@@ -99,7 +99,7 @@ export const affiliateDisclosureRule = defineRule({
     const affiliateLinks: Array<{ href: string; type: string }> = [];
 
     // Check URL parameters
-    $('a[href]').each((_, el) => {
+    $('a[href]').each((_: any, el: any) => {
       const href = $(el).attr('href') || '';
 
       // Check URL parameters
@@ -121,18 +121,18 @@ export const affiliateDisclosureRule = defineRule({
 
     // Check affiliate selectors
     for (const selector of AFFILIATE_PATTERNS.selectors) {
-      $(selector).each((_, el) => {
+      $(selector).each((_: any, el: any) => {
         const href = $(el).attr('href') || '';
-        if (!affiliateLinks.find((l) => l.href === href.slice(0, 80))) {
+        if (!affiliateLinks.find((l: any) => l.href === href.slice(0, 80))) {
           affiliateLinks.push({ href: href.slice(0, 80), type: 'selector' });
         }
       });
     }
 
     // Check for rel="sponsored"
-    $('a[rel*="sponsored"]').each((_, el) => {
+    $('a[rel*="sponsored"]').each((_: any, el: any) => {
       const href = $(el).attr('href') || '';
-      if (!affiliateLinks.find((l) => l.href === href.slice(0, 80))) {
+      if (!affiliateLinks.find((l: any) => l.href === href.slice(0, 80))) {
         affiliateLinks.push({ href: href.slice(0, 80), type: 'sponsored-rel' });
       }
     });
@@ -143,7 +143,7 @@ export const affiliateDisclosureRule = defineRule({
 
     // Check disclosure areas first
     for (const selector of DISCLOSURE_LOCATIONS) {
-      $(selector).each((_, el) => {
+      $(selector).each((_: any, el: any) => {
         const text = $(el).text().trim();
         for (const pattern of DISCLOSURE_PATTERNS.explicit) {
           const match = text.match(pattern);
@@ -183,7 +183,7 @@ export const affiliateDisclosureRule = defineRule({
 
     // Check for disclosure page link
     const hasDisclosurePage = $('a[href*="disclosure"], a[href*="affiliate"], a[href*="sponsored"]')
-      .filter((_, el) => {
+      .filter((_: any, el: any) => {
         const text = $(el).text().toLowerCase();
         return text.includes('disclosure') || text.includes('affiliate');
       }).length > 0;
@@ -195,67 +195,46 @@ export const affiliateDisclosureRule = defineRule({
     if (!hasAffiliateContent) {
       // No affiliate content detected
       if (hasDisclosure) {
-        return {
-          status: 'pass',
-          score: 100,
-          message: 'Disclosure found (no affiliate links detected on this page)',
-          details: {
-            hasAffiliateLinks: false,
-            hasDisclosure: true,
-            disclosures: foundDisclosures.slice(0, 3),
-          },
-        };
-      }
+      return pass('eeat-affiliate-disclosure', 'Disclosure found (no affiliate links detected on this page)', {
+        hasAffiliateLinks: false,
+        hasDisclosure: true,
+        disclosures: foundDisclosures.slice(0, 3),
+      });
+    }
 
-      return {
-        status: 'pass',
-        score: 100,
-        message: 'No affiliate or sponsored content detected',
-        details: {
-          hasAffiliateLinks: false,
-          hasDisclosure: false,
-        },
-      };
+      return pass('eeat-affiliate-disclosure', 'No affiliate or sponsored content detected', {
+        hasAffiliateLinks: false,
+        hasDisclosure: false,
+      });
     }
 
     // Has affiliate content
     if (hasDisclosure) {
-      const isProminentDisclosure = foundDisclosures.some(
-        (d) => d.location !== 'body' && d.location !== 'aside'
+      const isProminentDisclosure = foundDisclosures.some((d: any) => d.location !== 'body' && d.location !== 'aside'
       );
 
-      return {
-        status: 'pass',
-        score: isProminentDisclosure ? 100 : 90,
-        message: `Affiliate disclosure found${hasFtcMention ? ' (FTC compliant language)' : ''}`,
-        details: {
-          hasAffiliateLinks: true,
-          affiliateLinkCount: affiliateLinks.length,
-          hasDisclosure: true,
-          hasFtcMention,
-          hasDisclosurePage,
-          isProminentDisclosure,
-          disclosures: foundDisclosures.slice(0, 3),
-          affiliateLinks: affiliateLinks.slice(0, 5),
-          ...(!isProminentDisclosure && {
-            recommendation: 'Consider making disclosure more prominent (near top of content)',
-          }),
-        },
-      };
+      return pass('eeat-affiliate-disclosure', `Affiliate disclosure found${hasFtcMention ? ' (FTC compliant language)' : ''}`, {
+        hasAffiliateLinks: true,
+        affiliateLinkCount: affiliateLinks.length,
+        hasDisclosure: true,
+        hasFtcMention,
+        hasDisclosurePage,
+        isProminentDisclosure,
+        disclosures: foundDisclosures.slice(0, 3),
+        affiliateLinks: affiliateLinks.slice(0, 5),
+        ...(!isProminentDisclosure && {
+          recommendation: 'Consider making disclosure more prominent (near top of content)',
+        }),
+      });
     }
 
     // Affiliate content without disclosure
-    return {
-      status: 'warn',
-      score: 40,
-      message: `${affiliateLinks.length} affiliate link${affiliateLinks.length > 1 ? 's' : ''} found without disclosure - FTC requires clear disclosure`,
-      details: {
-        hasAffiliateLinks: true,
-        affiliateLinkCount: affiliateLinks.length,
-        hasDisclosure: false,
-        affiliateLinks: affiliateLinks.slice(0, 5),
-        recommendation: 'Add a clear affiliate disclosure near the top of content. Example: "This post contains affiliate links. We may earn a commission at no extra cost to you."',
-      },
-    };
+    return warn('eeat-affiliate-disclosure', `${affiliateLinks.length} affiliate link${affiliateLinks.length > 1 ? 's' : ''} found without disclosure - FTC requires clear disclosure`, {
+      hasAffiliateLinks: true,
+      affiliateLinkCount: affiliateLinks.length,
+      hasDisclosure: false,
+      affiliateLinks: affiliateLinks.slice(0, 5),
+      recommendation: 'Add a clear affiliate disclosure near the top of content. Example: "This post contains affiliate links. We may earn a commission at no extra cost to you."',
+    });
   },
 });

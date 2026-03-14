@@ -59,8 +59,7 @@ export const anchorTextRule = defineRule({
       }
 
       // Check for non-descriptive patterns
-      const isNonDescriptive = NON_DESCRIPTIVE_PATTERNS.some(
-        (pattern) => text === pattern || text === pattern + '...'
+      const isNonDescriptive = NON_DESCRIPTIVE_PATTERNS.some((pattern: any) => text === pattern || text === pattern + '...'
       );
 
       if (isNonDescriptive) {

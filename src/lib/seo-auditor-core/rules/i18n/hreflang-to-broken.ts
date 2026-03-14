@@ -34,7 +34,7 @@ export const hreflangToBrokenRule = defineRule({
     const brokenUrls: Array<{ hreflang: string; href: string; reason: string }> = [];
     const validUrls: Array<{ hreflang: string; href: string }> = [];
 
-    hreflangElements.each((_, el) => {
+    hreflangElements.each((_: any, el: any) => {
       const $el = $(el);
       const hreflang = $el.attr('hreflang') || '';
       const href = $el.attr('href') || '';

@@ -63,7 +63,7 @@ export const socialProfilesRule = defineRule({
 
     // Check structured data for sameAs (Organization/Person schema)
     const scripts = $('script[type="application/ld+json"]');
-    scripts.each((_, el) => {
+    scripts.each((_: any, el: any) => {
       try {
         const content = $(el).html();
         if (!content) return;
@@ -95,7 +95,7 @@ export const socialProfilesRule = defineRule({
     // Check HTML links in social containers
     for (const container of socialLinkContainers) {
       try {
-        $(`${container} a[href]`).each((_, el) => {
+        $(`${container} a[href]`).each((_: any, el: any) => {
           const href = $(el).attr('href') || '';
           const { isProfile, platform } = isProfileLink(href);
           if (isProfile && platform && !platforms.has(platform)) {
@@ -110,7 +110,7 @@ export const socialProfilesRule = defineRule({
 
     // Also check all links as fallback
     if (detectedProfiles.length === 0) {
-      $('a[href]').each((_, el) => {
+      $('a[href]').each((_: number, el: any) => {
         const href = $(el).attr('href') || '';
         const { isProfile, platform } = isProfileLink(href);
         if (isProfile && platform && !platforms.has(platform)) {
@@ -121,7 +121,7 @@ export const socialProfilesRule = defineRule({
     }
 
     const profileCount = detectedProfiles.length;
-    const platformList = detectedProfiles.map((p) => p.platform);
+    const platformList = detectedProfiles.map((p: any) => p.platform);
 
     // Good: Multiple social profiles found
     if (profileCount >= 3) {

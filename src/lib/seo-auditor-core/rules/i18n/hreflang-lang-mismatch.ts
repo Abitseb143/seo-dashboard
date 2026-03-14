@@ -55,7 +55,7 @@ export const hreflangLangMismatchRule = defineRule({
 
     let selfReferenceHreflang: string | null = null;
 
-    hreflangElements.each((_, el) => {
+    hreflangElements.each((_: any, el: any) => {
       const $el = $(el);
       const hreflang = ($el.attr('hreflang') || '').trim().toLowerCase();
       const href = ($el.attr('href') || '').trim();
@@ -90,7 +90,7 @@ export const hreflangLangMismatchRule = defineRule({
 
     // Compare primary language subtags (first 2 characters)
     const langPrimary = htmlLang.split('-')[0];
-    const hreflangPrimary = selfReferenceHreflang.split('-')[0];
+    const hreflangPrimary = (selfReferenceHreflang as any).split('-')[0];
 
     if (langPrimary === hreflangPrimary) {
       return pass(

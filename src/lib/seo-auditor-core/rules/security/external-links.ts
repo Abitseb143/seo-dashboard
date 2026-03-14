@@ -36,7 +36,7 @@ export const externalLinksSecurityRule = defineRule({
     const insecureLinks: InsecureLink[] = [];
     let totalBlankLinks = 0;
 
-    $('a[target="_blank"]').each((_, el) => {
+    $('a[target="_blank"]').each((_: any, el: any) => {
       const $link = $(el);
       const href = $link.attr('href') || '';
 

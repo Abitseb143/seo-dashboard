@@ -48,7 +48,7 @@ export const backgroundSeoRule = defineRule({
     const found: BackgroundImageItem[] = [];
 
     // Find all elements with inline background-image styles
-    $('[style*="background-image"]').each((_, el) => {
+    $('[style*="background-image"]').each((_: any, el: any) => {
       const $el = $(el);
       const style = $el.attr('style') || '';
       const tag = el.tagName?.toLowerCase() || 'unknown';
@@ -83,12 +83,12 @@ export const backgroundSeoRule = defineRule({
     }
 
     // Count important vs general background images
-    const importantCount = found.filter((item) => item.isImportant).length;
+    const importantCount = found.filter((item: any) => item.isImportant).length;
 
     const details = {
       totalCount: found.length,
       importantCount,
-      examples: found.slice(0, 10).map((item) => ({
+      examples: found.slice(0, 10).map((item: any) => ({
         tag: item.tag,
         url: item.url.length > 80 ? item.url.substring(0, 77) + '...' : item.url,
         isImportant: item.isImportant,

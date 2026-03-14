@@ -107,7 +107,7 @@ export const structuredDataArticleRule = defineRule({
       `All ${articles.length} Article schema(s) have required fields`,
       {
         articlesFound: articles.length,
-        articleTypes: articles.map((a) => a.type),
+        articleTypes: articles.map((a: any) => a.type),
       }
     );
   },

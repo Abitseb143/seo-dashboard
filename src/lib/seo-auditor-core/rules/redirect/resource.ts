@@ -36,7 +36,7 @@ export const resourceRedirectRule = defineRule({
     const httpResources: HttpResource[] = [];
 
     // Check stylesheets loaded via HTTP
-    $('link[rel="stylesheet"][href^="http://"]').each((_, el) => {
+    $('link[rel="stylesheet"][href^="http://"]').each((_: any, el: any) => {
       const href = $(el).attr('href');
       if (href) {
         httpResources.push({ type: 'stylesheet', url: href });
@@ -44,7 +44,7 @@ export const resourceRedirectRule = defineRule({
     });
 
     // Check scripts loaded via HTTP
-    $('script[src^="http://"]').each((_, el) => {
+    $('script[src^="http://"]').each((_: any, el: any) => {
       const src = $(el).attr('src');
       if (src) {
         httpResources.push({ type: 'script', url: src });
@@ -52,7 +52,7 @@ export const resourceRedirectRule = defineRule({
     });
 
     // Check images loaded via HTTP
-    $('img[src^="http://"]').each((_, el) => {
+    $('img[src^="http://"]').each((_: any, el: any) => {
       const src = $(el).attr('src');
       if (src) {
         httpResources.push({ type: 'image', url: src });

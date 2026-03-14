@@ -56,7 +56,7 @@ function extractTrigrams(text: string): Set<string> {
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, '')
     .split(/\s+/)
-    .filter((w) => w.length > 0)
+    .filter((w: any) => w.length > 0)
     .slice(0, MAX_WORDS);
 
   const trigrams = new Set<string>();

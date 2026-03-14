@@ -28,7 +28,7 @@ function createContext(
 
   // Extract links from HTML
   const links: AuditContext['links'] = [];
-  $('a[href]').each((_, el) => {
+  $('a[href]').each((_: any, el: any) => {
     const href = $(el).attr('href') || '';
     const text = $(el).text().trim();
     const isInternal = href.startsWith('/') || href.includes('example.com');

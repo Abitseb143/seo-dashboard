@@ -49,13 +49,13 @@ export const protocolRelativeRule = defineRule({
     const found: ProtocolRelativeItem[] = [];
 
     for (const { selector, attribute } of RESOURCE_SELECTORS) {
-      $(selector).each((_, el) => {
+      $(selector).each((_: number, el: any) => {
         const tag = el.tagName?.toLowerCase() || 'unknown';
         const value = $(el).attr(attribute) || '';
 
         if (attribute === 'srcset') {
           // Parse srcset for protocol-relative URLs
-          const srcsetParts = value.split(',').map((s) => s.trim());
+          const srcsetParts = value.split(',').map((s: any) => s.trim());
           for (const part of srcsetParts) {
             const srcUrl = part.split(/\s+/)[0];
             if (srcUrl && srcUrl.startsWith('//')) {
@@ -91,7 +91,7 @@ export const protocolRelativeRule = defineRule({
       {
         count: found.length,
         byTag,
-        examples: found.slice(0, 10).map((item) => `<${item.tag} ${item.attribute}="${item.url}">`),
+        examples: found.slice(0, 10).map((item: any) => `<${item.tag} ${item.attribute}="${item.url}">`),
         recommendation: 'Replace protocol-relative URLs (//example.com) with explicit https:// URLs to prevent potential HTTP downgrades',
       }
     );

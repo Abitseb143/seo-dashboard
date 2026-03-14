@@ -27,7 +27,7 @@ function analyzeFontLoading($: AuditContext['$']): FontAnalysis {
   let fontFacesWithoutDisplay = 0;
 
   // Check for preloaded fonts
-  $('link[rel="preload"][as="font"]').each((_, el) => {
+  $('link[rel="preload"][as="font"]').each((_: any, el: any) => {
     const href = $(el).attr('href');
     if (href) {
       preloadedFonts.push(href);
@@ -35,7 +35,7 @@ function analyzeFontLoading($: AuditContext['$']): FontAnalysis {
   });
 
   // Check Google Fonts links for display=swap
-  $('link[rel="stylesheet"], link[rel="preconnect"]').each((_, el) => {
+  $('link[rel="stylesheet"], link[rel="preconnect"]').each((_: any, el: any) => {
     const href = $(el).attr('href') || '';
     if (href.includes('fonts.googleapis.com') || href.includes('fonts.gstatic.com')) {
       const hasDisplaySwap = href.includes('display=swap');
@@ -44,7 +44,7 @@ function analyzeFontLoading($: AuditContext['$']): FontAnalysis {
   });
 
   // Check inline @font-face for font-display
-  $('style').each((_, el) => {
+  $('style').each((_: any, el: any) => {
     const content = $(el).html() || '';
     // Count @font-face declarations
     const fontFaceMatches = content.match(/@font-face\s*\{[^}]*\}/g) || [];
@@ -63,7 +63,7 @@ function analyzeFontLoading($: AuditContext['$']): FontAnalysis {
     totalFontLinks++;
   });
   // Also count from @font-face src in styles
-  $('style').each((_, el) => {
+  $('style').each((_: any, el: any) => {
     const content = $(el).html() || '';
     const fontSrcMatches = content.match(/url\s*\([^)]*\.(woff2?|ttf|otf|eot)/gi) || [];
     totalFontLinks += fontSrcMatches.length;
@@ -71,7 +71,7 @@ function analyzeFontLoading($: AuditContext['$']): FontAnalysis {
 
   const hasAnyOptimization =
     preloadedFonts.length > 0 ||
-    googleFontsLinks.some((f) => f.hasDisplaySwap) ||
+    googleFontsLinks.some((f: any) => f.hasDisplaySwap) ||
     fontFacesWithDisplay > 0;
 
   return {
@@ -124,7 +124,7 @@ export const fontLoadingRule = defineRule({
     }
 
     // Check Google Fonts without display=swap
-    const googleFontsWithoutSwap = analysis.googleFontsLinks.filter((f) => !f.hasDisplaySwap);
+    const googleFontsWithoutSwap = analysis.googleFontsLinks.filter((f: any) => !f.hasDisplaySwap);
     if (googleFontsWithoutSwap.length > 0) {
       issues.push(`${googleFontsWithoutSwap.length} Google Fonts URL(s) missing display=swap`);
       severity = 'warn';
@@ -172,7 +172,7 @@ export const fontLoadingRule = defineRule({
     const optimizations: string[] = [];
     if (analysis.preloadedFonts.length > 0) optimizations.push(`${analysis.preloadedFonts.length} preloaded`);
     if (analysis.fontFacesWithDisplay > 0) optimizations.push(`font-display set`);
-    if (analysis.googleFontsLinks.every((f) => f.hasDisplaySwap)) optimizations.push('display=swap');
+    if (analysis.googleFontsLinks.every((f: any) => f.hasDisplaySwap)) optimizations.push('display=swap');
 
     return pass(
       'perf-font-loading',

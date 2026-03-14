@@ -53,7 +53,7 @@ export const redirectLoopRule = defineRule({
       {
         chainLength: redirectChain.length,
         duplicateUrls: duplicates,
-        chain: redirectChain.map((entry) => ({
+        chain: redirectChain.map((entry: any) => ({
           url: entry.url,
           statusCode: entry.statusCode,
         })),

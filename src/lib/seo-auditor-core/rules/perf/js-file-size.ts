@@ -43,7 +43,7 @@ export const jsFileSizeRule = defineRule({
     let inlineScriptCount = 0;
     let largestScriptBytes = 0;
 
-    $('script:not([src])').each((_, el) => {
+    $('script:not([src])').each((_: number, el: any) => {
       const content = $(el).html() || '';
       // Skip non-JS script types (JSON-LD, templates, etc.)
       const type = $(el).attr('type') || '';

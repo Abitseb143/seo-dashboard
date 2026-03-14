@@ -13,7 +13,7 @@ export const brokenInternalRule = defineRule({
   weight: 1,
   run: async (context: AuditContext) => {
     const { links } = context;
-    const internalLinks = links.filter((link) => link.isInternal);
+    const internalLinks = links.filter((link: any) => link.isInternal);
 
     if (internalLinks.length === 0) {
       return pass(

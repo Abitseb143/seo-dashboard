@@ -88,8 +88,8 @@ export const trailingSlashRule = defineRule({
 
     // Get internal links only
     const internalLinks = links
-      .filter((link) => link.isInternal)
-      .map((link) => link.href);
+      .filter((link: any) => link.isInternal)
+      .map((link: any) => link.href);
 
     const analysis = analyzeTrailingSlashes(url, internalLinks);
 

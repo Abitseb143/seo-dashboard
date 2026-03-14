@@ -1,5 +1,5 @@
 import type { AuditContext, RuleResult } from '../../types';
-import { defineRule } from '../define-rule';
+import { defineRule, pass, warn } from '../define-rule';
 
 /**
  * Privacy policy link detection patterns
@@ -59,7 +59,7 @@ export const privacyPolicyRule = defineRule({
     const foundLinks: Array<{ href: string; text: string; location: string }> = [];
 
     // Check all links
-    $('a[href]').each((_, el) => {
+    $('a[href]').each((_: any, el: any) => {
       const href = $(el).attr('href') || '';
       const text = $(el).text().trim();
       const ariaLabel = $(el).attr('aria-label') || '';
@@ -96,44 +96,34 @@ export const privacyPolicyRule = defineRule({
     });
 
     // Check for schema.org markup
-    const hasSchemaPrivacy = $('script[type="application/ld+json"]').filter((_, el) => {
+    const hasSchemaPrivacy = $('script[type="application/ld+json"]').filter((_: any, el: any) => {
       const content = $(el).html() || '';
       return /privacyPolicy|privacy.?policy/i.test(content);
     }).length > 0;
 
     if (foundLinks.length > 0) {
-      const inFooter = foundLinks.some((link) => link.location === 'footer');
+      const inFooter = foundLinks.some((link: any) => link.location === 'footer');
 
-      return {
-        status: 'pass',
-        score: 100,
-        message: `Privacy policy link found${inFooter ? ' in footer' : ''} (${foundLinks.length} link${foundLinks.length > 1 ? 's' : ''})`,
-        details: {
-          hasPrivacyPolicy: true,
-          inFooter,
-          hasSchemaMarkup: hasSchemaPrivacy,
-          links: foundLinks.slice(0, 3),
-        },
-      };
+      return pass('legal-privacy-policy', `Privacy policy link found${inFooter ? ' in footer' : ''} (${foundLinks.length} link${foundLinks.length > 1 ? 's' : ''})`, {
+        hasPrivacyPolicy: true,
+        inFooter,
+        hasSchemaMarkup: hasSchemaPrivacy,
+        links: foundLinks.slice(0, 3),
+      });
     }
 
     // No privacy policy link found
-    return {
-      status: 'warn',
-      score: 50,
-      message: 'No privacy policy link found - legally required in many jurisdictions (GDPR, CCPA)',
-      details: {
-        hasPrivacyPolicy: false,
-        recommendation: 'Add a link to your privacy policy in the footer of every page',
-      },
-    };
+    return warn('legal-privacy-policy', 'No privacy policy link found - legally required in many jurisdictions (GDPR, CCPA)', {
+      hasPrivacyPolicy: false,
+      recommendation: 'Add a link to your privacy policy in the footer of every page',
+    });
   },
 });
 
 /**
  * Detect if element is in header, footer, or main content
  */
-function detectLocation($: cheerio.CheerioAPI, el: cheerio.Element): string {
+function detectLocation($: any, el: any): string {
   const parents = $(el).parents();
 
   for (let i = 0; i < parents.length; i++) {

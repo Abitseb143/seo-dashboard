@@ -48,7 +48,7 @@ export const contentStructureRule = defineRule({
 
     // Signal 2: Has hierarchical headings (h1 -> h2 -> h3)
     const headings: number[] = [];
-    $('h1, h2, h3, h4, h5, h6').each((_, el) => {
+    $('h1, h2, h3, h4, h5, h6').each((_: any, el: any) => {
       const tagName = el.tagName?.toLowerCase() || '';
       const level = parseInt(tagName.replace('h', ''), 10);
       if (!isNaN(level)) {
@@ -71,7 +71,7 @@ export const contentStructureRule = defineRule({
     // Signal 3: Has paragraph text (not just lists/tables)
     const paragraphs = $('p');
     let totalParagraphWords = 0;
-    paragraphs.each((_, el) => {
+    paragraphs.each((_: any, el: any) => {
       const text = $(el).text().trim();
       if (text.length > 0) {
         totalParagraphWords += text.split(/\s+/).length;

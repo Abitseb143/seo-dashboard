@@ -32,7 +32,7 @@ export const videoForAnimationsRule = defineRule({
     }
 
     // Also check <source> elements and any images not captured in context.images
-    $('source[type="image/gif"]').each((_, el) => {
+    $('source[type="image/gif"]').each((_: number, el: any) => {
       const srcset = $(el).attr('srcset') || $(el).attr('src') || '';
       if (srcset && !gifUrls.includes(srcset)) {
         gifUrls.push(srcset);
@@ -40,7 +40,7 @@ export const videoForAnimationsRule = defineRule({
     });
 
     // Check for CSS background GIFs in inline styles
-    $('[style*=".gif"]').each((_, el) => {
+    $('[style*=".gif"]').each((_: number, el: any) => {
       const style = $(el).attr('style') || '';
       const matches = style.match(/url\s*\(\s*['"]?([^'")]+\.gif[^'")]*)/gi) || [];
       for (const match of matches) {

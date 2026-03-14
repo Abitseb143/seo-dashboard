@@ -1,5 +1,5 @@
 import type { AuditContext, RuleResult } from '../../types';
-import { defineRule } from '../define-rule';
+import { defineRule, pass, warn } from '../define-rule';
 
 /**
  * Credential patterns for expertise detection
@@ -99,7 +99,7 @@ export const authorExpertiseRule = defineRule({
     }
 
     // 2. Check Schema.org for author details
-    $('script[type="application/ld+json"]').each((_, el) => {
+    $('script[type="application/ld+json"]').each((_: any, el: any) => {
       try {
         const content = $(el).html();
         if (content) {
@@ -176,7 +176,7 @@ export const authorExpertiseRule = defineRule({
     }
 
     // 4. Check for social links in page
-    $('a[href]').each((_, el) => {
+    $('a[href]').each((_: any, el: any) => {
       const href = $(el).attr('href') || '';
       // Only check links in author-related areas or with author-related classes
       const isAuthorRelated = $(el).closest('[class*="author"], [class*="bio"], .byline').length > 0;
@@ -198,34 +198,24 @@ export const authorExpertiseRule = defineRule({
     const hasExpertise = credentials.length > 0 || authorBio.length > 100 || socialLinks.length >= 2;
 
     if (signals.length >= 3 || (hasExpertise && signals.length >= 2)) {
-      return {
-        status: 'pass',
-        score: 100,
-        message: `Strong author expertise signals found (${signals.length} indicators)`,
-        details: {
-          signals,
-          credentials,
-          socialLinks,
-          hasAuthorBio: authorBio.length > 100,
-          hasAuthorLink,
-        },
-      };
+      return pass('eeat-author-expertise', `Strong author expertise signals found (${signals.length} indicators)`, {
+        signals,
+        credentials,
+        socialLinks,
+        hasAuthorBio: authorBio.length > 100,
+        hasAuthorLink,
+      });
     }
 
     if (signals.length > 0) {
-      return {
-        status: 'pass',
-        score: 80,
-        message: `Author expertise signals found (${signals.length} indicator${signals.length > 1 ? 's' : ''})`,
-        details: {
-          signals,
-          credentials,
-          socialLinks,
-          hasAuthorBio: authorBio.length > 100,
-          hasAuthorLink,
-          recommendation: 'Consider adding more expertise indicators: credentials, detailed bio, social profiles',
-        },
-      };
+      return pass('eeat-author-expertise', `Author expertise signals found (${signals.length} indicator${signals.length > 1 ? 's' : ''})`, {
+        signals,
+        credentials,
+        socialLinks,
+        hasAuthorBio: authorBio.length > 100,
+        hasAuthorLink,
+        recommendation: 'Consider adding more expertise indicators: credentials, detailed bio, social profiles',
+      });
     }
 
     // Check if there's an author at all (from author-byline rule context)
@@ -233,27 +223,17 @@ export const authorExpertiseRule = defineRule({
       $('meta[name="author"]').length > 0;
 
     if (hasAnyAuthor) {
-      return {
-        status: 'warn',
-        score: 50,
-        message: 'Author found but no expertise indicators detected',
-        details: {
-          signals: [],
-          credentials: [],
-          socialLinks: [],
-          recommendation: 'Add author credentials, bio, and professional social links to establish expertise',
-        },
-      };
+      return warn('eeat-author-expertise', 'Author found but no expertise indicators detected', {
+        signals: [],
+        credentials: [],
+        socialLinks: [],
+        recommendation: 'Add author credentials, bio, and professional social links to establish expertise',
+      });
     }
 
-    return {
-      status: 'warn',
-      score: 50,
-      message: 'No author present - expertise check not applicable',
-      details: {
-        signals: [],
-        note: 'This check requires author attribution. See eeat-author-byline rule.',
-      },
-    };
+    return warn('eeat-author-expertise', 'No author present - expertise check not applicable', {
+      signals: [],
+      note: 'This check requires author attribution. See eeat-author-byline rule.',
+    });
   },
 });

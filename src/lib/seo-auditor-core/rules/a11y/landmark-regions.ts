@@ -59,7 +59,7 @@ export const landmarkRegionsRule = defineRule({
       // Multiple navs are okay, but should have labels
       if (navElements.length > 1) {
         let labelled = 0;
-        navElements.each((_, el) => {
+        navElements.each((_: any, el: any) => {
           const $el = $(el);
           if (
             $el.attr('aria-label') ||

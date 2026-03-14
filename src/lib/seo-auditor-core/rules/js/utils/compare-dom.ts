@@ -1,12 +1,12 @@
-import type { CheerioAPI } from 'cheerio';
+// Cheerio types are causing build issues in production environment, using any as a fallback
 
 /**
  * Compare a specific element between raw and rendered DOM.
  * Returns null if rendered DOM is not available.
  */
 export function compareDomElement(
-  raw$: CheerioAPI,
-  rendered$: CheerioAPI | undefined,
+  raw$: any,
+  rendered$: any | undefined,
   selector: string
 ): { rawText: string; renderedText: string; differs: boolean } | null {
   if (!rendered$) return null;
@@ -25,8 +25,8 @@ export function compareDomElement(
  * Check if an element exists in rendered but not raw DOM (or vice versa).
  */
 export function elementPresenceChanged(
-  raw$: CheerioAPI,
-  rendered$: CheerioAPI | undefined,
+  raw$: any,
+  rendered$: any | undefined,
   selector: string
 ): { rawPresent: boolean; renderedPresent: boolean; changed: boolean } | null {
   if (!rendered$) return null;
@@ -45,8 +45,8 @@ export function elementPresenceChanged(
  * Get element attribute from both DOMs.
  */
 export function compareAttribute(
-  raw$: CheerioAPI,
-  rendered$: CheerioAPI | undefined,
+  raw$: any,
+  rendered$: any | undefined,
   selector: string,
   attribute: string
 ): { rawValue: string | undefined; renderedValue: string | undefined; differs: boolean } | null {

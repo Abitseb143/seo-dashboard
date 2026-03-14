@@ -44,7 +44,7 @@ export const hreflangRule = defineRule({
     const hreflangTags: HreflangTag[] = [];
 
     // Collect hreflang from link elements
-    $('link[rel="alternate"][hreflang]').each((_, el) => {
+    $('link[rel="alternate"][hreflang]').each((_: any, el: any) => {
       const $el = $(el);
       const hreflang = $el.attr('hreflang') || '';
       const href = $el.attr('href') || '';
@@ -149,8 +149,7 @@ export const hreflangRule = defineRule({
     }
 
     // Determine severity based on issue types
-    const hasCriticalIssues = issues.some(
-      (i) =>
+    const hasCriticalIssues = issues.some((i: any) =>
         i.issue.includes('Empty') ||
         i.issue.includes('Invalid') ||
         i.issue.includes('Duplicate')

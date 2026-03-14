@@ -25,7 +25,7 @@ export const contentLengthRule = defineRule({
     const headingsInfo: HeadingLengthInfo[] = [];
     const issues: HeadingLengthInfo[] = [];
 
-    $('h1, h2, h3, h4, h5, h6').each((_, el) => {
+    $('h1, h2, h3, h4, h5, h6').each((_: any, el: any) => {
       const tagName = el.tagName?.toLowerCase() || '';
       const level = parseInt(tagName.replace('h', ''), 10);
       const text = $(el).text().trim();
@@ -55,8 +55,8 @@ export const contentLengthRule = defineRule({
     }
 
     if (issues.length > 0) {
-      const tooShort = issues.filter((i) => i.issue === 'too-short').length;
-      const tooLong = issues.filter((i) => i.issue === 'too-long').length;
+      const tooShort = issues.filter((i: any) => i.issue === 'too-short').length;
+      const tooLong = issues.filter((i: any) => i.issue === 'too-long').length;
 
       const messageParts: string[] = [];
       if (tooShort > 0) {
@@ -74,7 +74,7 @@ export const contentLengthRule = defineRule({
           issueCount: issues.length,
           tooShort,
           tooLong,
-          issues: issues.map((i) => ({
+          issues: issues.map((i: any) => ({
             level: i.level,
             text: i.text.substring(0, 80) + (i.text.length > 80 ? '...' : ''),
             length: i.length,

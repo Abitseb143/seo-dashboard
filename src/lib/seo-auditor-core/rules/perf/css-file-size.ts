@@ -25,7 +25,7 @@ function analyzeCss($: AuditContext['$']): CssAnalysis {
   const externalUrls: string[] = [];
 
   // Count external stylesheets
-  $('link[rel="stylesheet"]').each((_, el) => {
+  $('link[rel="stylesheet"]').each((_: any, el: any) => {
     const href = $(el).attr('href');
     if (href) {
       externalUrls.push(href);
@@ -35,7 +35,7 @@ function analyzeCss($: AuditContext['$']): CssAnalysis {
   // Calculate inline CSS size
   let inlineCssBytes = 0;
   let inlineStyleCount = 0;
-  $('style').each((_, el) => {
+  $('style').each((_: any, el: any) => {
     const content = $(el).html() || '';
     inlineCssBytes += content.length;
     inlineStyleCount++;

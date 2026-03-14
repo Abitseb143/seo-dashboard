@@ -20,7 +20,7 @@ export const metaInBodyRule = defineRule({
     const issues: { tag: string; content?: string }[] = [];
 
     // Check for <meta> tags inside <body>
-    $('body meta').each((_, el) => {
+    $('body meta').each((_: any, el: any) => {
       const name = $(el).attr('name') || $(el).attr('property') || $(el).attr('http-equiv');
       const content = $(el).attr('content')?.substring(0, 50);
       issues.push({
@@ -39,7 +39,7 @@ export const metaInBodyRule = defineRule({
     }
 
     // Check for <link rel="canonical"> inside <body>
-    $('body link[rel="canonical"]').each((_, el) => {
+    $('body link[rel="canonical"]').each((_: any, el: any) => {
       issues.push({
         tag: '<link rel="canonical">',
         content: $(el).attr('href')?.substring(0, 50),
@@ -47,7 +47,7 @@ export const metaInBodyRule = defineRule({
     });
 
     // Check for other important links in body
-    $('body link[rel="icon"], body link[rel="shortcut icon"]').each((_, el) => {
+    $('body link[rel="icon"], body link[rel="shortcut icon"]').each((_: any, el: any) => {
       issues.push({
         tag: `<link rel="${$(el).attr('rel')}">`,
         content: $(el).attr('href')?.substring(0, 50),

@@ -68,7 +68,7 @@ export const shareButtonsRule = defineRule({
     const shareLinks: string[] = [];
 
     // Check all links for share URL patterns
-    $('a[href]').each((_, el) => {
+    $('a[href]').each((_: number, el: any) => {
       const href = $(el).attr('href') || '';
       for (const { platform, pattern } of SHARE_PATTERNS) {
         if (pattern.test(href)) {
@@ -95,7 +95,7 @@ export const shareButtonsRule = defineRule({
     }
 
     // Check for common share button scripts
-    const hasShareScript = $('script[src]').toArray().some((el) => {
+    const hasShareScript = $('script[src]').toArray().some((el: any) => {
       const src = $(el).attr('src') || '';
       return /addthis|sharethis|addtoany|socialshare/i.test(src);
     });

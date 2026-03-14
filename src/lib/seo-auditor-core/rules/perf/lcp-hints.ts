@@ -25,7 +25,7 @@ function analyzeLcpHints($: AuditContext['$']): LcpAnalysis {
   let candidate: LcpCandidate | null = null;
 
   // Collect preloaded images
-  $('link[rel="preload"][as="image"]').each((_, el) => {
+  $('link[rel="preload"][as="image"]').each((_: number, el: any) => {
     const href = $(el).attr('href');
     if (href) {
       preloadedImages.push(href);

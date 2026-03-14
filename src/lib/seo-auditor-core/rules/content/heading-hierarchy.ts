@@ -22,7 +22,7 @@ export const hierarchyRule = defineRule({
     const headings: HeadingInfo[] = [];
 
     // Collect all headings in document order
-    $('h1, h2, h3, h4, h5, h6').each((index, el) => {
+    $('h1, h2, h3, h4, h5, h6').each((index: any, el: any) => {
       const tagName = el.tagName?.toLowerCase() || '';
       const level = parseInt(tagName.replace('h', ''), 10);
       const text = $(el).text().trim();
@@ -60,7 +60,7 @@ export const hierarchyRule = defineRule({
       }
     }
 
-    const headingStructure = headings.map((h) => ({
+    const headingStructure = headings.map((h: any) => ({
       level: h.level,
       text: h.text.substring(0, 50) + (h.text.length > 50 ? '...' : ''),
     }));

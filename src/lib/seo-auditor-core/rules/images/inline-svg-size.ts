@@ -18,7 +18,7 @@ export const inlineSvgSizeRule = defineRule({
   category: 'images',
   weight: 5,
   run: (context: AuditContext) => {
-    const { inlineSvgs } = context;
+    const inlineSvgs = context.inlineSvgs || [];
 
     if (inlineSvgs.length === 0) {
       return pass('images-inline-svg-size', 'No inline SVGs found on page', {
@@ -26,8 +26,7 @@ export const inlineSvgSizeRule = defineRule({
       });
     }
 
-    const largeSvgs = inlineSvgs.filter(
-      (svg) => svg.sizeBytes > MAX_INLINE_SVG_BYTES
+    const largeSvgs = inlineSvgs.filter((svg: any) => svg.sizeBytes > MAX_INLINE_SVG_BYTES
     );
     const totalSvgBytes = inlineSvgs.reduce(
       (sum, svg) => sum + svg.sizeBytes,
@@ -46,7 +45,7 @@ export const inlineSvgSizeRule = defineRule({
           largeSvgCount: largeSvgs.length,
           totalSvgCount: inlineSvgs.length,
           totalSvgBytesKB: (totalSvgBytes / 1024).toFixed(1),
-          largeSvgs: largeSvgs.slice(0, 5).map((svg) => ({
+          largeSvgs: largeSvgs.slice(0, 5).map((svg: any) => ({
             sizeKB: (svg.sizeBytes / 1024).toFixed(1),
             hasViewBox: svg.hasViewBox,
             snippet: svg.snippet,

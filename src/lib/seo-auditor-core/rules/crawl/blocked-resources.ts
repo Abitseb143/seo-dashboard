@@ -28,7 +28,7 @@ const RESOURCE_EXTENSION_PATTERNS = [
  * Parse robots.txt to extract Disallow rules for relevant user-agents
  */
 function extractDisallowRules(content: string): string[] {
-  const lines = content.split('\n').map((line) => line.trim());
+  const lines = content.split('\n').map((line: any) => line.trim());
   const disallowRules: string[] = [];
 
   let inRelevantUserAgent = false;

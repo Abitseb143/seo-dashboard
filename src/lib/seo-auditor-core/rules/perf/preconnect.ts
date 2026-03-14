@@ -54,7 +54,7 @@ function analyzePreconnects($: AuditContext['$'], pageUrl: string): PreconnectAn
   }
 
   // Collect existing preconnects
-  $('link[rel="preconnect"]').each((_, el) => {
+  $('link[rel="preconnect"]').each((_: number, el: any) => {
     const href = $(el).attr('href');
     if (href) {
       try {
@@ -67,7 +67,7 @@ function analyzePreconnects($: AuditContext['$'], pageUrl: string): PreconnectAn
   });
 
   // Collect existing dns-prefetch
-  $('link[rel="dns-prefetch"]').each((_, el) => {
+  $('link[rel="dns-prefetch"]').each((_: number, el: any) => {
     const href = $(el).attr('href');
     if (href) {
       dnsPrefetches.push(href.replace(/^\/\//, 'https://'));
@@ -76,7 +76,7 @@ function analyzePreconnects($: AuditContext['$'], pageUrl: string): PreconnectAn
 
   // Find third-party origins from various resources
   const collectOrigins = (selector: string, attr: string) => {
-    $(selector).each((_, el) => {
+    $(selector).each((_: number, el: any) => {
       const url = $(el).attr(attr);
       if (url) {
         const origin = extractOrigin(url);
@@ -99,7 +99,7 @@ function analyzePreconnects($: AuditContext['$'], pageUrl: string): PreconnectAn
   // Find missing preconnects for critical origins
   const existingHints = new Set([
     ...preconnects,
-    ...dnsPrefetches.map((d) => {
+    ...dnsPrefetches.map((d: any) => {
       try {
         return new URL(d).origin;
       } catch {
@@ -112,8 +112,7 @@ function analyzePreconnects($: AuditContext['$'], pageUrl: string): PreconnectAn
   for (const origin of thirdPartyOrigins) {
     // Check if it's a critical origin that should have preconnect
     const hostname = new URL(origin).hostname;
-    const isCritical = CRITICAL_ORIGINS.some(
-      (critical) => hostname === critical || hostname.endsWith(`.${critical}`)
+    const isCritical = CRITICAL_ORIGINS.some((critical: any) => hostname === critical || hostname.endsWith(`.${critical}`)
     );
 
     if (isCritical && !existingHints.has(origin)) {

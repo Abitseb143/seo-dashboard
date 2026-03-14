@@ -1,5 +1,5 @@
 import type { AuditContext, RuleResult } from '../../types';
-import { defineRule } from '../define-rule';
+import { defineRule, pass, warn } from '../define-rule';
 
 /**
  * Authoritative domain patterns
@@ -91,7 +91,7 @@ export const citationsRule = defineRule({
     }> = [];
 
     // Check external links
-    $('a[href^="http"]').each((_, el) => {
+    $('a[href^="http"]').each((_: any, el: any) => {
       const href = $(el).attr('href') || '';
       const rel = $(el).attr('rel') || '';
 
@@ -133,7 +133,7 @@ export const citationsRule = defineRule({
     }
 
     // Check for references/sources section
-    const hasReferencesSection = $('h2, h3, h4').filter((_, el) => {
+    const hasReferencesSection = $('h2, h3, h4').filter((_: any, el: any) => {
       const text = $(el).text().toLowerCase();
       return /references|sources|bibliography|works cited|further reading/i.test(text);
     }).length > 0;
@@ -145,45 +145,35 @@ export const citationsRule = defineRule({
     }
 
     // Check for nofollow on citations (generally not recommended)
-    const nofollowedCitations = citations.filter((c) => c.hasNofollow);
+    const nofollowedCitations = citations.filter((c: any) => c.hasNofollow);
 
     if (citations.length >= 3) {
-      return {
-        status: 'pass',
-        score: 100,
-        message: `Strong citation profile: ${citations.length} authoritative sources cited`,
-        details: {
-          citationCount: citations.length,
-          citationsByType,
-          hasCitationMarkup,
-          hasReferencesSection,
-          nofollowedCount: nofollowedCitations.length,
-          citations: citations.slice(0, 5),
-          ...(nofollowedCitations.length > 0 && {
-            recommendation: 'Consider removing nofollow from citations to authoritative sources',
-          }),
-        },
-      };
+      return pass('eeat-citations', `Strong citation profile: ${citations.length} authoritative sources cited`, {
+        citationCount: citations.length,
+        citationsByType,
+        hasCitationMarkup,
+        hasReferencesSection,
+        nofollowedCount: nofollowedCitations.length,
+        citations: citations.slice(0, 5),
+        ...(nofollowedCitations.length > 0 && {
+          recommendation: 'Consider removing nofollow from citations to authoritative sources',
+        }),
+      });
     }
 
     if (citations.length >= 1) {
-      return {
-        status: 'pass',
-        score: 80,
-        message: `${citations.length} authoritative source${citations.length > 1 ? 's' : ''} cited`,
-        details: {
-          citationCount: citations.length,
-          citationsByType,
-          hasCitationMarkup,
-          hasReferencesSection,
-          citations: citations.slice(0, 5),
-          recommendation: 'Consider adding more citations to authoritative sources (.gov, .edu, research papers)',
-        },
-      };
+      return pass('eeat-citations', `${citations.length} authoritative source${citations.length > 1 ? 's' : ''} cited`, {
+        citationCount: citations.length,
+        citationsByType,
+        hasCitationMarkup,
+        hasReferencesSection,
+        citations: citations.slice(0, 5),
+        recommendation: 'Consider adding more citations to authoritative sources (.gov, .edu, research papers)',
+      });
     }
 
     // Check if page has external links at all
-    const externalLinkCount = $('a[href^="http"]').filter((_, el) => {
+    const externalLinkCount = $('a[href^="http"]').filter((_: any, el: any) => {
       const href = $(el).attr('href') || '';
       try {
         const linkDomain = new URL(href).hostname;
@@ -194,30 +184,20 @@ export const citationsRule = defineRule({
     }).length;
 
     if (externalLinkCount > 0) {
-      return {
-        status: 'warn',
-        score: 60,
-        message: `${externalLinkCount} external links found, but none to recognized authoritative sources`,
-        details: {
-          citationCount: 0,
-          externalLinkCount,
-          hasCitationMarkup,
-          hasReferencesSection,
-          recommendation: 'Consider linking to authoritative sources like .gov, .edu, or peer-reviewed publications',
-        },
-      };
-    }
-
-    return {
-      status: 'pass',
-      score: 100,
-      message: 'No external citations found (may not be needed for this content type)',
-      details: {
+      return warn('eeat-citations', `${externalLinkCount} external links found, but none to recognized authoritative sources`, {
         citationCount: 0,
+        externalLinkCount,
         hasCitationMarkup,
         hasReferencesSection,
-        recommendation: 'For content making claims, consider citing authoritative sources to build credibility',
-      },
-    };
+        recommendation: 'Consider linking to authoritative sources like .gov, .edu, or peer-reviewed publications',
+      });
+    }
+
+    return pass('eeat-citations', 'No external citations found (may not be needed for this content type)', {
+      citationCount: 0,
+      hasCitationMarkup,
+      hasReferencesSection,
+      recommendation: 'For content making claims, consider citing authoritative sources to build credibility',
+    });
   },
 });

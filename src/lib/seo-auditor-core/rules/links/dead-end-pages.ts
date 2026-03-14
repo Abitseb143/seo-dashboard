@@ -18,7 +18,7 @@ export const deadEndPagesRule = defineRule({
     const pageUrl = new URL(url);
 
     // Filter to internal links, excluding self-anchors (same page with hash)
-    const outgoingInternalLinks = links.filter((link) => {
+    const outgoingInternalLinks = links.filter((link: any) => {
       if (!link.isInternal) return false;
 
       try {

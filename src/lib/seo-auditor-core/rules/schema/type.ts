@@ -87,7 +87,7 @@ export const structuredDataTypeRule = defineRule({
     let scriptsWithoutType = 0;
     let parseErrors = 0;
 
-    jsonLdScripts.each((index, element) => {
+    jsonLdScripts.each((index: any, element: any) => {
       const rawContent = $(element).html() || '';
       const trimmedContent = rawContent.trim();
 
@@ -112,7 +112,7 @@ export const structuredDataTypeRule = defineRule({
     });
 
     // Identify known schema.org types
-    const recognizedTypes = allTypes.filter((t) =>
+    const recognizedTypes = allTypes.filter((t: any) =>
       COMMON_SCHEMA_TYPES.includes(t)
     );
     const uniqueTypes = [...new Set(allTypes)];

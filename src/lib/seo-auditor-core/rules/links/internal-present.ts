@@ -12,10 +12,10 @@ export const internalPresentRule = defineRule({
   weight: 1,
   run: async (context: AuditContext) => {
     const { links, url } = context;
-    const internalLinks = links.filter((link) => link.isInternal);
+    const internalLinks = links.filter((link: any) => link.isInternal);
 
     // Filter out self-referencing links (same page anchors)
-    const uniqueInternalLinks = internalLinks.filter((link) => {
+    const uniqueInternalLinks = internalLinks.filter((link: any) => {
       try {
         const linkUrl = new URL(link.href);
         const currentUrl = new URL(url);
@@ -45,7 +45,7 @@ export const internalPresentRule = defineRule({
       `Found ${uniqueInternalLinks.length} internal link(s) on this page`,
       {
         internalLinkCount: uniqueInternalLinks.length,
-        examples: uniqueInternalLinks.slice(0, 5).map((link) => link.href),
+        examples: uniqueInternalLinks.slice(0, 5).map((link: any) => link.href),
       }
     );
   },

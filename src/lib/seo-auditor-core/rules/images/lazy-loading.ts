@@ -42,7 +42,7 @@ export const lazyLoadingRule = defineRule({
       );
     }
 
-    const notLazyLoaded = belowFoldImages.filter((img) => !img.isLazyLoaded);
+    const notLazyLoaded = belowFoldImages.filter((img: any) => !img.isLazyLoaded);
 
     if (notLazyLoaded.length > 0) {
       const percentage = ((notLazyLoaded.length / belowFoldImages.length) * 100).toFixed(1);
@@ -54,7 +54,7 @@ export const lazyLoadingRule = defineRule({
           notLazyLoadedCount: notLazyLoaded.length,
           belowFoldCount: belowFoldImages.length,
           totalImages: images.length,
-          images: notLazyLoaded.slice(0, 10).map((img) => ({
+          images: notLazyLoaded.slice(0, 10).map((img: any) => ({
             src: img.src,
           })),
           suggestion: 'Add loading="lazy" to images below the fold to improve initial page load performance',

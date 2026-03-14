@@ -74,7 +74,7 @@ export const localhostRule = defineRule({
     // 2. Scan raw href/src attributes on a, link, script, img elements
     //    This catches references that may not be in context.links (e.g. <link>, <script>, <img>)
     const selector = 'a[href], link[href], script[src], img[src]';
-    context.$(selector).each((_i, el) => {
+    context.$(selector).each((_i: any, el: any) => {
       const node = context.$(el);
       const href = node.attr('href') || node.attr('src') || '';
       if (!href) return;
@@ -82,8 +82,7 @@ export const localhostRule = defineRule({
       if (isLocalhostUrl(href)) {
         const tag = (el as unknown as { tagName: string }).tagName || 'unknown';
         // Avoid duplicates from context.links already captured above
-        const alreadyCaptured = found.some(
-          (f) => f.href === href && f.element === tag
+        const alreadyCaptured = found.some((f: any) => f.href === href && f.element === tag
         );
         if (!alreadyCaptured) {
           found.push({ element: tag, href });

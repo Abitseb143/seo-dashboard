@@ -26,7 +26,7 @@ export const httpsDowngradeRule = defineRule({
     }
 
     // Find links that downgrade to HTTP
-    const httpLinks = links.filter((link) => {
+    const httpLinks = links.filter((link: any) => {
       try {
         const linkUrl = new URL(link.href);
         return linkUrl.protocol === 'http:';
@@ -38,7 +38,7 @@ export const httpsDowngradeRule = defineRule({
     if (httpLinks.length > 0) {
       // Get unique domains being linked to via HTTP
       const httpDomains = [...new Set(
-        httpLinks.map((link) => {
+        httpLinks.map((link: any) => {
           try {
             return new URL(link.href).hostname;
           } catch {
@@ -53,7 +53,7 @@ export const httpsDowngradeRule = defineRule({
         {
           httpLinkCount: httpLinks.length,
           httpDomains: httpDomains.slice(0, 10),
-          httpLinks: httpLinks.slice(0, 10).map((l) => ({
+          httpLinks: httpLinks.slice(0, 10).map((l: any) => ({
             href: l.href,
             text: l.text,
           })),

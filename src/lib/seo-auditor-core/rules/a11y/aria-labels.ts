@@ -114,21 +114,21 @@ export const ariaLabelsRule = defineRule({
     const checkedCount = { total: 0 };
 
     for (const selector of INTERACTIVE_SELECTORS) {
-      $(selector).each((_, el) => {
+      $(selector).each((_: number, el: any) => {
         checkedCount.total++;
 
-        if (!hasAccessibleName($, el)) {
-          const $el = $(el);
-          const tag = el.tagName?.toLowerCase() || 'unknown';
+        if (hasAccessibleName($, el)) return;
+        
+        const $el = $(el);
+        const tag = el.tagName?.toLowerCase() || 'unknown';
 
-          missingLabels.push({
-            tag,
-            type: $el.attr('type'),
-            id: $el.attr('id'),
-            class: $el.attr('class')?.split(' ')[0], // First class only
-            reason: getReasonForElement(tag, $el.attr('role')),
-          });
-        }
+        missingLabels.push({
+          tag,
+          type: $el.attr('type'),
+          id: $el.attr('id'),
+          class: $el.attr('class')?.split(' ')[0], // First class only
+          reason: getReasonForElement(tag, $el.attr('role')),
+        });
       });
     }
 

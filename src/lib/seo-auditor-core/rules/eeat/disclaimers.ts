@@ -1,5 +1,5 @@
 import type { AuditContext, RuleResult } from '../../types';
-import { defineRule } from '../define-rule';
+import { defineRule, pass, warn } from '../define-rule';
 import { detectYMYL } from './ymyl-detection';
 
 /**
@@ -80,7 +80,7 @@ export const disclaimersRule = defineRule({
     // Check disclaimer areas specifically
     let disclaimerAreaText = '';
     for (const selector of DISCLAIMER_SELECTORS) {
-      $(selector).each((_, el) => {
+      $(selector).each((_: any, el: any) => {
         disclaimerAreaText += ' ' + $(el).text();
       });
     }
@@ -89,7 +89,7 @@ export const disclaimersRule = defineRule({
 
     // Check for disclaimers based on YMYL categories
     const categoriesToCheck = ymylResult.isYMYL
-      ? ymylResult.categories.map((c) => c.toLowerCase().replace(/[^a-z]/g, ''))
+      ? ymylResult.categories.map((c: any) => c.toLowerCase().replace(/[^a-z]/g, ''))
       : [];
 
     // Map category names to disclaimer pattern keys
@@ -137,75 +137,50 @@ export const disclaimersRule = defineRule({
     if (!ymylResult.isYMYL) {
       // Non-YMYL content doesn't require disclaimers
       if (foundDisclaimers.length > 0) {
-        return {
-          status: 'pass',
-          score: 100,
-          message: `Disclaimer found (not required for non-YMYL content)`,
-          details: {
-            isYMYL: false,
-            disclaimers: foundDisclaimers,
-            hasDisclaimerSection,
-          },
-        };
-      }
+      return pass('eeat-disclaimers', `Disclaimer found (not required for non-YMYL content)`, {
+        isYMYL: false,
+        disclaimers: foundDisclaimers,
+        hasDisclaimerSection,
+      });
+    }
 
-      return {
-        status: 'pass',
-        score: 100,
-        message: 'Non-YMYL content - disclaimers not required',
-        details: {
-          isYMYL: false,
-          disclaimers: [],
-        },
-      };
+      return pass('eeat-disclaimers', 'Non-YMYL content - disclaimers not required', {
+        isYMYL: false,
+        disclaimers: [],
+      });
     }
 
     // YMYL content - disclaimers are important
-    const requiredCategories = categoriesToCheck.filter((c) => categoryToPatternKey[c]);
-    const foundCategories = foundDisclaimers.map((d) => d.type).filter((t) => t !== 'general');
+    const requiredCategories = categoriesToCheck.filter((c: any) => categoryToPatternKey[c]);
+    const foundCategories = foundDisclaimers.map((d: any) => d.type).filter((t: any) => t !== 'general');
 
     if (foundDisclaimers.length > 0 && foundCategories.length >= requiredCategories.length) {
-      return {
-        status: 'pass',
-        score: 100,
-        message: `Appropriate disclaimers found for YMYL content (${ymylResult.categories.join(', ')})`,
-        details: {
-          isYMYL: true,
-          ymylCategories: ymylResult.categories,
-          disclaimers: foundDisclaimers,
-          hasDisclaimerSection,
-        },
-      };
+      return pass('eeat-disclaimers', `Appropriate disclaimers found for YMYL content (${ymylResult.categories.join(', ')})`, {
+        isYMYL: true,
+        ymylCategories: ymylResult.categories,
+        disclaimers: foundDisclaimers,
+        hasDisclaimerSection,
+      });
     }
 
     if (foundDisclaimers.length > 0) {
-      return {
-        status: 'pass',
-        score: 80,
-        message: `Disclaimer found, but may need category-specific disclaimer for ${ymylResult.categories.join(', ')} content`,
-        details: {
-          isYMYL: true,
-          ymylCategories: ymylResult.categories,
-          disclaimers: foundDisclaimers,
-          hasDisclaimerSection,
-          recommendation: `Consider adding specific disclaimers for ${ymylResult.categories.join(', ')} content`,
-        },
-      };
+      return pass('eeat-disclaimers', `Disclaimer found, but may need category-specific disclaimer for ${ymylResult.categories.join(', ')} content`, {
+        isYMYL: true,
+        ymylCategories: ymylResult.categories,
+        disclaimers: foundDisclaimers,
+        hasDisclaimerSection,
+        recommendation: `Consider adding specific disclaimers for ${ymylResult.categories.join(', ')} content`,
+      });
     }
 
     // YMYL content without disclaimers
-    return {
-      status: 'warn',
-      score: 50,
-      message: `YMYL content (${ymylResult.categories.join(', ')}) without appropriate disclaimers`,
-      details: {
-        isYMYL: true,
-        ymylCategories: ymylResult.categories,
-        confidence: ymylResult.confidence,
-        disclaimers: [],
-        recommendation: getDisclaimerRecommendation(ymylResult.categories),
-      },
-    };
+    return warn('eeat-disclaimers', `YMYL content (${ymylResult.categories.join(', ')}) without appropriate disclaimers`, {
+      isYMYL: true,
+      ymylCategories: ymylResult.categories,
+      confidence: ymylResult.confidence,
+      disclaimers: [],
+      recommendation: getDisclaimerRecommendation(ymylResult.categories),
+    });
   },
 });
 

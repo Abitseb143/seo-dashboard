@@ -1,5 +1,5 @@
 import type { AuditContext, RuleResult } from '../../types';
-import { defineRule } from '../define-rule';
+import { defineRule, pass } from '../define-rule';
 
 /**
  * YMYL (Your Money Your Life) content categories and detection patterns
@@ -59,7 +59,7 @@ export interface YMYLDetectionResult {
  * Detect YMYL content in a page
  * Exported for use by other rules (disclaimers, etc.)
  */
-export function detectYMYL($: cheerio.CheerioAPI): YMYLDetectionResult {
+export function detectYMYL($: any): YMYLDetectionResult {
   // Get main content text (exclude nav, footer, sidebar)
   const mainContent = $('main, article, [role="main"], .content, .post-content, .entry-content')
     .first()
@@ -93,7 +93,7 @@ export function detectYMYL($: cheerio.CheerioAPI): YMYLDetectionResult {
 
   // Determine confidence level
   let confidence: 'high' | 'medium' | 'low' | 'none' = 'none';
-  const maxMatches = Math.max(...Object.values(details).map((d) => d.matches));
+  const maxMatches = Math.max(...Object.values(details).map((d: any) => d.matches));
 
   if (detectedCategories.length >= 2 || maxMatches >= 15) {
     confidence = 'high';
@@ -132,29 +132,19 @@ export const ymylDetectionRule = defineRule({
     const result = detectYMYL($);
 
     if (result.isYMYL) {
-      return {
-        status: 'pass',
-        score: 100, // YMYL detection is informational, not a problem
-        message: `YMYL content detected: ${result.categories.join(', ')} (${result.confidence} confidence)`,
-        details: {
-          isYMYL: true,
-          categories: result.categories,
-          confidence: result.confidence,
-          categoryDetails: result.details,
-          recommendation: 'YMYL content requires strong E-E-A-T signals: author credentials, citations, disclaimers',
-        },
-      };
+      return pass('eeat-ymyl-detection', `YMYL content detected: ${result.categories.join(', ')} (${result.confidence} confidence)`, {
+        isYMYL: true,
+        categories: result.categories,
+        confidence: result.confidence,
+        categoryDetails: result.details,
+        recommendation: 'YMYL content requires strong E-E-A-T signals: author credentials, citations, disclaimers',
+      });
     }
 
-    return {
-      status: 'pass',
-      score: 100,
-      message: 'No YMYL content detected',
-      details: {
-        isYMYL: false,
-        categories: [],
-        confidence: 'none',
-      },
-    };
+    return pass('eeat-ymyl-detection', 'No YMYL content detected', {
+      isYMYL: false,
+      categories: [],
+      confidence: 'none',
+    });
   },
 });

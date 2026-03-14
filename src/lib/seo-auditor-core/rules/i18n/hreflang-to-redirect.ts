@@ -57,7 +57,7 @@ export const hreflangToRedirectRule = defineRule({
 
     const httpUrls: Array<{ hreflang: string; href: string }> = [];
 
-    hreflangElements.each((_, el) => {
+    hreflangElements.each((_: any, el: any) => {
       const $el = $(el);
       const hreflang = $el.attr('hreflang') || '';
       const href = ($el.attr('href') || '').trim();

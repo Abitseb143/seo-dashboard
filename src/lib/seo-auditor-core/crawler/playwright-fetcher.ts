@@ -1,11 +1,10 @@
 // Mocked Playwright Fetcher since Next.js cannot bundle it
 import { CoreWebVitals } from '../types';
-import type { CheerioAPI } from 'cheerio';
 
 export interface PlaywrightFetchResult {
   url: string;
   html: string;
-  $: CheerioAPI;
+  $: any;
   headers: Record<string, string>;
   statusCode: number;
   responseTime: number;

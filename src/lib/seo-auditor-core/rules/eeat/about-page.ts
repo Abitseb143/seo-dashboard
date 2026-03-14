@@ -1,5 +1,5 @@
 import type { AuditContext, RuleResult } from '../../types';
-import { defineRule } from '../define-rule';
+import { defineRule, pass, warn } from '../define-rule';
 
 /**
  * About page detection patterns
@@ -48,7 +48,7 @@ export const aboutPageRule = defineRule({
     const foundLinks: Array<{ href: string; text: string; location: string }> = [];
 
     // Check all links
-    $('a[href]').each((_, el) => {
+    $('a[href]').each((_: any, el: any) => {
       const href = $(el).attr('href') || '';
       const text = $(el).text().trim();
 
@@ -78,14 +78,14 @@ export const aboutPageRule = defineRule({
     });
 
     // Check navigation specifically
-    const navAbout = $('nav a, header a, [role="navigation"] a').filter((_, el) => {
+    const navAbout = $('nav a, header a, [role="navigation"] a').filter((_: any, el: any) => {
       const text = $(el).text().trim().toLowerCase();
       const href = $(el).attr('href') || '';
       return text.includes('about') || /\/about/i.test(href);
     });
 
     if (navAbout.length > 0 && foundLinks.length === 0) {
-      navAbout.each((_, el) => {
+      navAbout.each((_: any, el: any) => {
         const href = $(el).attr('href') || '';
         const text = $(el).text().trim();
         foundLinks.push({ href, text, location: 'navigation' });
@@ -93,38 +93,28 @@ export const aboutPageRule = defineRule({
     }
 
     if (foundLinks.length > 0) {
-      const inNav = foundLinks.some((link) =>
+      const inNav = foundLinks.some((link: any) =>
         link.location === 'navigation' || link.location === 'header'
       );
 
-      return {
-        status: 'pass',
-        score: 100,
-        message: `About page link found${inNav ? ' in navigation' : ''}`,
-        details: {
-          hasAboutPage: true,
-          inNavigation: inNav,
-          links: foundLinks.slice(0, 3),
-        },
-      };
+      return pass('eeat-about-page', `About page link found${inNav ? ' in navigation' : ''}`, {
+        hasAboutPage: true,
+        inNavigation: inNav,
+        links: foundLinks.slice(0, 3),
+      });
     }
 
-    return {
-      status: 'warn',
-      score: 50,
-      message: 'No about page link found - important for trust and E-E-A-T',
-      details: {
-        hasAboutPage: false,
-        recommendation: 'Add an "About" or "About Us" page explaining who you are and link to it from your navigation',
-      },
-    };
+    return warn('eeat-about-page', 'No about page link found - important for trust and E-E-A-T', {
+      hasAboutPage: false,
+      recommendation: 'Add an "About" or "About Us" page explaining who you are and link to it from your navigation',
+    });
   },
 });
 
 /**
  * Detect element location (header, footer, navigation, body)
  */
-function detectLocation($: cheerio.CheerioAPI, el: cheerio.Element): string {
+function detectLocation($: any, el: any): string {
   const parents = $(el).parents();
 
   for (let i = 0; i < parents.length; i++) {

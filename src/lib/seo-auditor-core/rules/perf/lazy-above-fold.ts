@@ -27,7 +27,7 @@ function analyzeLazyAboveFold($: AuditContext['$']): LazyAboveFoldAnalysis {
   let lazyAboveFoldCount = 0;
 
   // Get first N images (considered above fold)
-  $('img').slice(0, ABOVE_FOLD_COUNT).each((index, el) => {
+  $('img').slice(0, ABOVE_FOLD_COUNT).each((index: number, el: any) => {
     const src = $(el).attr('src') || $(el).attr('data-src') || '';
     const loading = $(el).attr('loading');
     const fetchPriority = $(el).attr('fetchpriority');
@@ -82,11 +82,11 @@ export const lazyAboveFoldRule = defineRule({
 
     // Use context.images with isLazyLoaded property
     const aboveFoldImages = images.slice(0, ABOVE_FOLD_COUNT);
-    const lazyAboveFold = aboveFoldImages.filter((img) => img.isLazyLoaded);
+    const lazyAboveFold = aboveFoldImages.filter((img: any) => img.isLazyLoaded);
     const firstImageLazy = aboveFoldImages[0]?.isLazyLoaded ?? false;
 
     const details = {
-      aboveFoldImages: aboveFoldImages.map((img) => ({
+      aboveFoldImages: aboveFoldImages.map((img: any) => ({
         src: img.src,
         isLazy: img.isLazyLoaded,
       })),

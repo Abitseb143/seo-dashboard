@@ -29,7 +29,7 @@ function calculateDomStats($: AuditContext['$']): DomStats {
   let widestSelector = '';
 
   // Count all elements and analyze structure
-  $('body *').each((_, el) => {
+  $('body *').each((_: number, el: any) => {
     totalNodes++;
 
     // Calculate depth by counting ancestors

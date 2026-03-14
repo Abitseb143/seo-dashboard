@@ -25,7 +25,7 @@ export const h1SingleRule = defineRule({
 
     if (count > 1) {
       const h1Texts: string[] = [];
-      h1Elements.each((_, el) => {
+      h1Elements.each((_: any, el: any) => {
         h1Texts.push($(el).text().trim());
       });
 

@@ -39,7 +39,7 @@ function getBaseUrl(url: string): string {
  * the wildcard *) AND whether that section contains `Disallow: /`.
  */
 function findBlockedAiBots(content: string): string[] {
-  const lines = content.split('\n').map((l) => l.trim());
+  const lines = content.split('\n').map((l: any) => l.trim());
   const blocked: string[] = [];
 
   // Build a map: user-agent -> list of disallow paths
@@ -120,8 +120,7 @@ function findBlockedAiBots(content: string): string[] {
 
     for (const g of groups) {
       // Check if this group applies to this bot (exact match or wildcard)
-      const applies = g.agents.some(
-        (agent) =>
+      const applies = g.agents.some((agent: any) =>
           agent === '*' || agent.toLowerCase() === botLower
       );
 
@@ -190,7 +189,7 @@ export const aiBotAccessRule = defineRule({
     }
 
     const blockedBots = findBlockedAiBots(robotsContent);
-    const allowedBots = AI_BOTS.filter((bot) => !blockedBots.includes(bot));
+    const allowedBots = AI_BOTS.filter((bot: any) => !blockedBots.includes(bot));
 
     const details: Record<string, unknown> = {
       robotsTxtUrl,

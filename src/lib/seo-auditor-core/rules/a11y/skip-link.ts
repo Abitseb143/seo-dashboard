@@ -49,7 +49,7 @@ export const skipLinkRule = defineRule({
     // Check first 10 links for skip link
     $('a[href^="#"]')
       .slice(0, 15)
-      .each((_, el) => {
+      .each((_: any, el: any) => {
         const $el = $(el);
         const href = $el.attr('href') || '';
         const text = $el.text().trim().toLowerCase();
@@ -57,7 +57,7 @@ export const skipLinkRule = defineRule({
 
         // Check if this looks like a skip link
         const isSkipLink =
-          skipLinkPatterns.some((p) => p.test(text) || p.test(ariaLabel)) ||
+          skipLinkPatterns.some((p: any) => p.test(text) || p.test(ariaLabel)) ||
           commonTargets.includes(href.toLowerCase());
 
         if (isSkipLink) {
@@ -95,12 +95,12 @@ export const skipLinkRule = defineRule({
     if (!skipLinkFound) {
       $('[role="link"]')
         .slice(0, 5)
-        .each((_, el) => {
+        .each((_: any, el: any) => {
           const $el = $(el);
           const text = $el.text().trim().toLowerCase();
           const ariaLabel = $el.attr('aria-label')?.toLowerCase() || '';
 
-          if (skipLinkPatterns.some((p) => p.test(text) || p.test(ariaLabel))) {
+          if (skipLinkPatterns.some((p: any) => p.test(text) || p.test(ariaLabel))) {
             skipLinkFound = true;
             skipLinkInfo = {
               text: text || ariaLabel,

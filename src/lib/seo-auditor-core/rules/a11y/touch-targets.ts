@@ -38,7 +38,7 @@ export const touchTargetsRule = defineRule({
     const interactiveSelector =
       'a[href], button, input:not([type="hidden"]), select, textarea, [role="button"], [role="link"], [tabindex]:not([tabindex="-1"])';
 
-    $(interactiveSelector).each((_, el) => {
+    $(interactiveSelector).each((_: any, el: any) => {
       const $el = $(el);
       const style = $el.attr('style') || '';
 
@@ -83,7 +83,7 @@ export const touchTargetsRule = defineRule({
     });
 
     // Check style tags for patterns that create small targets
-    $('style').each((_, el) => {
+    $('style').each((_: any, el: any) => {
       const css = $(el).html() || '';
 
       // Check for button/link styles with small dimensions
@@ -103,7 +103,7 @@ export const touchTargetsRule = defineRule({
     });
 
     // Check for very small images used as links
-    $('a img, button img').each((_, el) => {
+    $('a img, button img').each((_: any, el: any) => {
       const $img = $(el);
       const width = $img.attr('width');
       const height = $img.attr('height');

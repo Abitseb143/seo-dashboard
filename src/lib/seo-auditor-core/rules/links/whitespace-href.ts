@@ -20,7 +20,7 @@ export const whitespaceHrefRule = defineRule({
     const whitespaceOnly: string[] = [];
     const untrimmed: Array<{ href: string; text: string }> = [];
 
-    $('a[href]').each((_i, el) => {
+    $('a[href]').each((_i: any, el: any) => {
       const node = $(el);
       const href = node.attr('href');
       if (href === undefined || href === null) return;

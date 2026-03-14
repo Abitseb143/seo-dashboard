@@ -37,7 +37,7 @@ export const horizontalScrollRule = defineRule({
     const MOBILE_WIDTH = 400; // Conservative mobile viewport threshold
 
     // Check elements with fixed width > mobile viewport
-    $('[style*="width"]').each((_, el) => {
+    $('[style*="width"]').each((_: any, el: any) => {
       const $el = $(el);
       const style = $el.attr('style') || '';
 
@@ -61,7 +61,7 @@ export const horizontalScrollRule = defineRule({
     });
 
     // Check width attributes on elements
-    $('[width]').each((_, el) => {
+    $('[width]').each((_: any, el: any) => {
       const $el = $(el);
       const width = $el.attr('width');
 
@@ -82,7 +82,7 @@ export const horizontalScrollRule = defineRule({
     });
 
     // Check images without max-width constraints
-    $('img').each((_, el) => {
+    $('img').each((_: any, el: any) => {
       const $el = $(el);
       const style = $el.attr('style') || '';
       const width = $el.attr('width');
@@ -110,7 +110,7 @@ export const horizontalScrollRule = defineRule({
     });
 
     // Check tables without responsive handling
-    $('table').each((_, el) => {
+    $('table').each((_: any, el: any) => {
       const $el = $(el);
       const style = $el.attr('style') || '';
       const parentStyle = $el.parent().attr('style') || '';
@@ -135,7 +135,7 @@ export const horizontalScrollRule = defineRule({
     });
 
     // Check pre/code blocks without overflow
-    $('pre, code').each((_, el) => {
+    $('pre, code').each((_: any, el: any) => {
       const $el = $(el);
       const style = $el.attr('style') || '';
       const parentStyle = $el.parent().attr('style') || '';
@@ -161,7 +161,7 @@ export const horizontalScrollRule = defineRule({
     });
 
     // Check iframes with fixed dimensions
-    $('iframe').each((_, el) => {
+    $('iframe').each((_: any, el: any) => {
       const $el = $(el);
       const width = $el.attr('width');
       const style = $el.attr('style') || '';
@@ -189,7 +189,7 @@ export const horizontalScrollRule = defineRule({
     });
 
     // Check for viewport units that might cause issues
-    $('[style*="100vw"]').each((_, el) => {
+    $('[style*="100vw"]').each((_: any, el: any) => {
       const $el = $(el);
       const style = $el.attr('style') || '';
 
@@ -214,7 +214,7 @@ export const horizontalScrollRule = defineRule({
     }
 
     // Critical issues: images and iframes are most impactful
-    const criticalCount = issues.filter(i =>
+    const criticalCount = issues.filter((i: any) =>
       i.element.startsWith('img') || i.element.startsWith('iframe')
     ).length;
 

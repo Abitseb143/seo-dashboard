@@ -21,7 +21,7 @@ export const contentUniqueRule = defineRule({
     const headingTexts: Map<string, { count: number; levels: number[] }> =
       new Map();
 
-    $('h1, h2, h3, h4, h5, h6').each((_, el) => {
+    $('h1, h2, h3, h4, h5, h6').each((_: any, el: any) => {
       const tagName = el.tagName?.toLowerCase() || '';
       const level = parseInt(tagName.replace('h', ''), 10);
       const text = $(el).text().trim().toLowerCase();
@@ -44,7 +44,7 @@ export const contentUniqueRule = defineRule({
     }
 
     const duplicates: DuplicateInfo[] = [];
-    headingTexts.forEach((info, text) => {
+    headingTexts.forEach((info: any, text: any) => {
       if (info.count > 1) {
         duplicates.push({
           text: text.substring(0, 50) + (text.length > 50 ? '...' : ''),

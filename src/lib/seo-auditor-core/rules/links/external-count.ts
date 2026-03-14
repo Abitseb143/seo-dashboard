@@ -16,12 +16,12 @@ export const externalCountRule = defineRule({
   run: (context: AuditContext) => {
     const { links } = context;
 
-    const externalLinks = links.filter((link) => !link.isInternal);
+    const externalLinks = links.filter((link: any) => !link.isInternal);
     const externalCount = externalLinks.length;
 
     // Get unique external domains
     const externalDomains = [...new Set(
-      externalLinks.map((link) => {
+      externalLinks.map((link: any) => {
         try {
           return new URL(link.href).hostname;
         } catch {

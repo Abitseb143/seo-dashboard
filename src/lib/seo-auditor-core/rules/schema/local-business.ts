@@ -148,7 +148,7 @@ export const structuredDataLocalBusinessRule = defineRule({
       `All ${businesses.length} LocalBusiness schema(s) have required fields`,
       {
         businessesFound: businesses.length,
-        businessTypes: businesses.map((b) => b.type),
+        businessTypes: businesses.map((b: any) => b.type),
       }
     );
   },

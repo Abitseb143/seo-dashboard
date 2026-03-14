@@ -24,7 +24,7 @@ export const authorBylineRule = defineRule({
     const jsonLdScripts = $('script[type="application/ld+json"]');
     let schemaAuthor: string | null = null;
 
-    jsonLdScripts.each((_, el) => {
+    jsonLdScripts.each((_: any, el: any) => {
       try {
         const content = $(el).html();
         if (content) {

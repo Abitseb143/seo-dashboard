@@ -39,16 +39,14 @@ export const videoCaptionsRule = defineRule({
     const validVideos: string[] = [];
 
     // Check HTML5 video elements
-    $('video').each((index, el) => {
+    $('video').each((index: any, el: any) => {
       const $video = $(el);
       const videoId = $video.attr('id') || `video-${index + 1}`;
       const src = $video.attr('src') || $video.find('source').first().attr('src') || 'unknown';
 
       // Check for track elements
       const $tracks = $video.find('track');
-      const hasCaptions = $tracks.filter(
-        (_, track) =>
-          $(track).attr('kind') === 'captions' || $(track).attr('kind') === 'subtitles'
+      const hasCaptions = $tracks.filter((_: any, track: any) => $(track).attr('kind') === 'captions' || $(track).attr('kind') === 'subtitles'
       ).length > 0;
 
       if (hasCaptions) {
@@ -82,7 +80,7 @@ export const videoCaptionsRule = defineRule({
     });
 
     // Check iframe video embeds (YouTube, Vimeo, etc.)
-    $('iframe').each((index, el) => {
+    $('iframe').each((index: any, el: any) => {
       const $iframe = $(el);
       const src = $iframe.attr('src') || '';
 
@@ -146,7 +144,7 @@ export const videoCaptionsRule = defineRule({
     });
 
     // Check for audio elements (transcripts needed)
-    $('audio').each((index, el) => {
+    $('audio').each((index: any, el: any) => {
       const $audio = $(el);
       const audioId = $audio.attr('id') || `audio-${index + 1}`;
 

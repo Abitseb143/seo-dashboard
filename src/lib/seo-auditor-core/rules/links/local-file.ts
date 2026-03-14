@@ -30,7 +30,7 @@ export const localFileRule = defineRule({
     const found: Array<{ element: string; href: string; reason: string }> = [];
 
     // 1. Check for file:// protocol via Cheerio selector
-    context.$('[href^="file://"], [src^="file://"]').each((_i, el) => {
+    context.$('[href^="file://"], [src^="file://"]').each((_i: any, el: any) => {
       const node = context.$(el);
       const href = node.attr('href') || node.attr('src') || '';
       const tag = (el as unknown as { tagName: string }).tagName || 'unknown';
@@ -38,7 +38,7 @@ export const localFileRule = defineRule({
     });
 
     // 2. Check all href and src attributes for absolute OS paths
-    context.$('[href], [src]').each((_i, el) => {
+    context.$('[href], [src]').each((_i: any, el: any) => {
       const node = context.$(el);
       const href = node.attr('href') || node.attr('src') || '';
       if (!href) return;
@@ -47,8 +47,7 @@ export const localFileRule = defineRule({
         if (href.startsWith(prefix)) {
           const tag = (el as unknown as { tagName: string }).tagName || 'unknown';
           // Avoid duplicates if already caught by file:// check
-          const alreadyCaptured = found.some(
-            (f) => f.href === href && f.element === tag
+          const alreadyCaptured = found.some((f: any) => f.href === href && f.element === tag
           );
           if (!alreadyCaptured) {
             found.push({ element: tag, href, reason: 'absolute OS path' });

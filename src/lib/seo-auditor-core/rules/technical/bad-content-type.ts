@@ -40,8 +40,7 @@ export const badContentTypeRule = defineRule({
     // Extract the media type portion before any parameters (e.g., charset)
     const mediaType = contentType.split(';')[0].trim().toLowerCase();
 
-    const isValid = VALID_HTML_CONTENT_TYPES.some(
-      (valid) => mediaType === valid
+    const isValid = VALID_HTML_CONTENT_TYPES.some((valid: any) => mediaType === valid
     );
 
     if (isValid) {

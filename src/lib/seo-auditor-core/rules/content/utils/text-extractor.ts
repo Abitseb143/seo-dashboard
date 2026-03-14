@@ -1,10 +1,10 @@
-import type { CheerioAPI } from 'cheerio';
+// Cheerio types are causing build issues in production environment, using any as a fallback
 
 /**
  * Extract readable text content from page body
  * Excludes: scripts, styles, navigation, headers, footers
  */
-export function extractMainContent($: CheerioAPI): string {
+export function extractMainContent($: any): string {
   // Clone to avoid modifying original
   const body = $('body').clone();
 
@@ -29,7 +29,7 @@ export function tokenize(text: string): string[] {
     .toLowerCase()
     .replace(/[^\w\s]/g, ' ')
     .split(/\s+/)
-    .filter((word) => word.length > 0);
+    .filter((word: any) => word.length > 0);
 }
 
 /**
@@ -44,7 +44,7 @@ export function countWords(text: string): number {
  * Splits on sentence-ending punctuation
  */
 export function countSentences(text: string): number {
-  const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+  const sentences = text.split(/[.!?]+/).filter((s: any) => s.trim().length > 0);
   return Math.max(1, sentences.length);
 }
 

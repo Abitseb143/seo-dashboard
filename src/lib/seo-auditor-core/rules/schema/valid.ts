@@ -39,7 +39,7 @@ export const structuredDataValidRule = defineRule({
     let validCount = 0;
     let invalidCount = 0;
 
-    jsonLdScripts.each((index, element) => {
+    jsonLdScripts.each((index: any, element: any) => {
       const rawContent = $(element).html() || '';
       const trimmedContent = rawContent.trim();
 
@@ -89,8 +89,8 @@ export const structuredDataValidRule = defineRule({
     }
 
     const invalidDetails = parseResults
-      .filter((r) => !r.valid)
-      .map((r) => ({
+      .filter((r: any) => !r.valid)
+      .map((r: any) => ({
         scriptIndex: r.index,
         error: r.error,
       }));

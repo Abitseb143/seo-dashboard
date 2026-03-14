@@ -95,7 +95,7 @@ export const blockedResourcesRule = defineRule({
 
     // Collect all script sources
     const scriptSources: string[] = [];
-    context.$('script[src]').each((_, el) => {
+    context.$('script[src]').each((_: any, el: any) => {
       const src = context.$(el).attr('src');
       if (src) {
         scriptSources.push(src);

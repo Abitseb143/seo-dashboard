@@ -67,19 +67,19 @@ export const interstitialsRule = defineRule({
     ];
 
     // Check for elements with popup/modal classes or IDs
-    $('[class], [id]').each((_, el) => {
+    $('[class], [id]').each((_: number, el: any) => {
       const $el = $(el);
       const className = ($el.attr('class') || '').toLowerCase();
       const id = ($el.attr('id') || '').toLowerCase();
       const combined = `${className} ${id}`;
 
       // Skip if it's an acceptable type
-      if (acceptablePatterns.some((pattern) => pattern.test(combined))) {
+      if (acceptablePatterns.some((pattern: any) => pattern.test(combined))) {
         return;
       }
 
       // Check for popup patterns
-      const isPopup = popupPatterns.some((pattern) => pattern.test(combined));
+      const isPopup = popupPatterns.some((pattern: any) => pattern.test(combined));
 
       if (isPopup) {
         const style = $el.attr('style') || '';
@@ -99,7 +99,7 @@ export const interstitialsRule = defineRule({
 
         if (isFullScreen || isOverlay) {
           const tag = el.tagName?.toLowerCase() || 'element';
-          const matchedPattern = popupPatterns.find((p) => p.test(combined));
+          const matchedPattern = popupPatterns.find((p: any) => p.test(combined));
 
           issues.push({
             element: id ? `${tag}#${id}` : `${tag}.${className.split(' ')[0]}`,
@@ -111,7 +111,7 @@ export const interstitialsRule = defineRule({
     });
 
     // Check for newsletter/subscription popups specifically
-    $('form').each((_, el) => {
+    $('form').each((_: number, el: any) => {
       const $el = $(el);
       const action = ($el.attr('action') || '').toLowerCase();
       const className = ($el.attr('class') || '').toLowerCase();
@@ -157,7 +157,7 @@ export const interstitialsRule = defineRule({
     });
 
     // Check for exit-intent or on-load popup scripts
-    $('script').each((_, el) => {
+    $('script').each((_: number, el: any) => {
       const content = $(el).html() || '';
 
       // Look for exit intent detection
@@ -189,7 +189,7 @@ export const interstitialsRule = defineRule({
     });
 
     // Check for large fixed position elements at top
-    $('[style*="position: fixed"], [style*="position:fixed"]').each((_, el) => {
+    $('[style*="position: fixed"], [style*="position:fixed"]').each((_: number, el: any) => {
       const $el = $(el);
       const style = $el.attr('style') || '';
       const className = ($el.attr('class') || '').toLowerCase();
@@ -229,7 +229,7 @@ export const interstitialsRule = defineRule({
     });
 
     // Check for splash screens
-    $('[class*="splash"], [id*="splash"]').each((_, el) => {
+    $('[class*="splash"], [id*="splash"]').each((_: number, el: any) => {
       const $el = $(el);
       const style = $el.attr('style') || '';
 
@@ -260,7 +260,7 @@ export const interstitialsRule = defineRule({
 
     // Exit-intent and on-load popups are most problematic
     const criticalTypes = ['Exit-intent popup', 'On-load popup', 'Full-screen fixed element'];
-    const criticalCount = issues.filter((i) => criticalTypes.includes(i.type)).length;
+    const criticalCount = issues.filter((i: any) => criticalTypes.includes(i.type)).length;
 
     if (criticalCount > 0) {
       return fail(

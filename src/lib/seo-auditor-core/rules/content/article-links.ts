@@ -46,8 +46,8 @@ export const articleLinksRule = defineRule({
 
     // Count links (from context.links which are already extracted)
     const totalLinks = links.length;
-    const internalLinks = links.filter((l) => l.isInternal).length;
-    const externalLinks = links.filter((l) => !l.isInternal).length;
+    const internalLinks = links.filter((l: any) => l.isInternal).length;
+    const externalLinks = links.filter((l: any) => !l.isInternal).length;
 
     // Calculate density (links per 100 words)
     const linksPer100Words = (totalLinks / wordCount) * 100;

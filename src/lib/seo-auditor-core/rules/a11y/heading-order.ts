@@ -37,7 +37,7 @@ export const headingOrderRule = defineRule({
     const skips: HeadingSkip[] = [];
 
     // Collect all headings in document order
-    $('h1, h2, h3, h4, h5, h6').each((_, el) => {
+    $('h1, h2, h3, h4, h5, h6').each((_: any, el: any) => {
       const tag = el.tagName?.toLowerCase() || 'h1';
       const level = parseInt(tag.charAt(1), 10);
       const text = $(el).text().trim().slice(0, 50);
@@ -82,7 +82,7 @@ export const headingOrderRule = defineRule({
     if (skips.length === 0 && !firstHeadingNotH1) {
       return pass('a11y-heading-order', 'Heading hierarchy is correct', {
         totalHeadings: headings.length,
-        levels: [...new Set(headings.map((h) => `H${h.level}`))].join(', '),
+        levels: [...new Set(headings.map((h: any) => `H${h.level}`))].join(', '),
       });
     }
 

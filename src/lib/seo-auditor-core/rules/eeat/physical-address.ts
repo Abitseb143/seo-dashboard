@@ -1,5 +1,5 @@
 import type { AuditContext, RuleResult } from '../../types';
-import { defineRule } from '../define-rule';
+import { defineRule, pass, warn } from '../define-rule';
 
 /**
  * Address pattern detection
@@ -59,7 +59,7 @@ export const physicalAddressRule = defineRule({
     const foundAddresses: Array<{ source: string; value: string }> = [];
 
     // 1. Check Schema.org for address
-    $('script[type="application/ld+json"]').each((_, el) => {
+    $('script[type="application/ld+json"]').each((_: any, el: any) => {
       try {
         const content = $(el).html();
         if (content) {
@@ -71,7 +71,7 @@ export const physicalAddressRule = defineRule({
 
             // Check @type for address-related types
             const type = record['@type'];
-            if (typeof type === 'string' && SCHEMA_ADDRESS_TYPES.some((t) => type.includes(t))) {
+            if (typeof type === 'string' && SCHEMA_ADDRESS_TYPES.some((t: any) => type.includes(t))) {
               // Look for address property
               if (record.address) {
                 const addr = record.address as Record<string, unknown>;
@@ -109,7 +109,7 @@ export const physicalAddressRule = defineRule({
 
     // 2. Check HTML address elements and selectors
     for (const selector of ADDRESS_SELECTORS) {
-      $(selector).each((_, el) => {
+      $(selector).each((_: any, el: any) => {
         const text = $(el).text().trim();
         if (text.length > 10 && text.length < 200) {
           // Check if it looks like an address
@@ -166,55 +166,39 @@ export const physicalAddressRule = defineRule({
       '[class*="cart"], [class*="shop"], [class*="store"], [class*="product"], form[action*="checkout"], [class*="booking"], [class*="appointment"]'
     ).length > 0;
 
-    const isLocalBusiness = $('script[type="application/ld+json"]').filter((_, el) => {
+    const isLocalBusiness = $('script[type="application/ld+json"]').filter((_: any, el: any) => {
       const content = $(el).html() || '';
       return /LocalBusiness|Store|Restaurant|Hotel|MedicalBusiness/i.test(content);
     }).length > 0;
 
     // Deduplicate addresses
-    const uniqueAddresses = foundAddresses.filter(
-      (addr, index, arr) => arr.findIndex((a) => a.value === addr.value) === index
+    const uniqueAddresses = foundAddresses.filter((addr, index: any, arr: any) => arr.findIndex((a: any) => a.value === addr.value) === index
     );
 
     if (uniqueAddresses.length > 0) {
-      const hasSchemaAddress = uniqueAddresses.some((a) => a.source === 'Schema.org');
+      const hasSchemaAddress = uniqueAddresses.some((a: any) => a.source === 'Schema.org');
 
-      return {
-        status: 'pass',
-        score: 100,
-        message: `Physical address found${hasSchemaAddress ? ' with structured data' : ''}`,
-        details: {
-          hasAddress: true,
-          hasSchemaMarkup: hasSchemaAddress,
-          hasGoogleMaps,
-          addresses: uniqueAddresses.slice(0, 3),
-        },
-      };
+      return pass('eeat-physical-address', `Physical address found${hasSchemaAddress ? ' with structured data' : ''}`, {
+        hasAddress: true,
+        hasSchemaMarkup: hasSchemaAddress,
+        hasGoogleMaps,
+        addresses: uniqueAddresses.slice(0, 3),
+      });
     }
 
     // No address found
     if (isLocalBusiness || isBusinessSite) {
-      return {
-        status: 'warn',
-        score: 50,
-        message: 'No physical address found - important for business trust signals',
-        details: {
-          hasAddress: false,
-          isBusinessSite: true,
-          recommendation: 'Add your business address using Schema.org PostalAddress and display it visibly on the page',
-        },
-      };
+      return warn('eeat-physical-address', 'No physical address found - important for business trust signals', {
+        hasAddress: false,
+        isBusinessSite: true,
+        recommendation: 'Add your business address using Schema.org PostalAddress and display it visibly on the page',
+      });
     }
 
-    return {
-      status: 'pass',
-      score: 100,
-      message: 'No physical address found (may not be required for this site type)',
-      details: {
-        hasAddress: false,
-        isBusinessSite: false,
-        recommendation: 'Consider adding a physical address if you operate a business to build trust',
-      },
-    };
+    return pass('eeat-physical-address', 'No physical address found (may not be required for this site type)', {
+      hasAddress: false,
+      isBusinessSite: false,
+      recommendation: 'Consider adding a physical address if you operate a business to build trust',
+    });
   },
 });

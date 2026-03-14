@@ -34,13 +34,13 @@ export const robotsMetaRule = defineRule({
       return content
         .toLowerCase()
         .split(/[,\s]+/)
-        .map((d) => d.trim())
-        .filter((d) => d.length > 0);
+        .map((d: any) => d.trim())
+        .filter((d: any) => d.length > 0);
     };
 
     // Check meta robots tag
     const robotsMeta = $('meta[name="robots"]');
-    robotsMeta.each((_, el) => {
+    robotsMeta.each((_: any, el: any) => {
       const content = $(el).attr('content') || '';
       const directives = parseDirectives(content);
       allDirectives.push({ source: 'meta[name="robots"]', directives });
@@ -54,7 +54,7 @@ export const robotsMetaRule = defineRule({
 
     // Check googlebot meta tag
     const googlebotMeta = $('meta[name="googlebot"]');
-    googlebotMeta.each((_, el) => {
+    googlebotMeta.each((_: any, el: any) => {
       const content = $(el).attr('content') || '';
       const directives = parseDirectives(content);
       allDirectives.push({ source: 'meta[name="googlebot"]', directives });
@@ -68,7 +68,7 @@ export const robotsMetaRule = defineRule({
 
     // Check bingbot meta tag
     const bingbotMeta = $('meta[name="bingbot"]');
-    bingbotMeta.each((_, el) => {
+    bingbotMeta.each((_: any, el: any) => {
       const content = $(el).attr('content') || '';
       const directives = parseDirectives(content);
       allDirectives.push({ source: 'meta[name="bingbot"]', directives });

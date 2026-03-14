@@ -36,7 +36,7 @@ export const multipleViewportsRule = defineRule({
 
     // Collect the content of each viewport tag for details
     const viewportContents: string[] = [];
-    viewportTags.each((_, el) => {
+    viewportTags.each((_: number, el: any) => {
       const content = $(el).attr('content') || '(empty)';
       viewportContents.push(content);
     });

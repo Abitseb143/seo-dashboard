@@ -35,7 +35,7 @@ export const tableHeadersRule = defineRule({
     const issues: TableIssue[] = [];
     const tables: Array<{ hasHeaders: boolean; isLayout: boolean }> = [];
 
-    $('table').each((index, el) => {
+    $('table').each((index: any, el: any) => {
       const $table = $(el);
 
       // Check if marked as layout table
@@ -79,7 +79,7 @@ export const tableHeadersRule = defineRule({
       let headersWithScope = 0;
       let headersWithoutScope = 0;
 
-      $headers.each((_, th) => {
+      $headers.each((_: any, th: any) => {
         const $th = $(th);
         const scope = $th.attr('scope');
 
@@ -127,12 +127,12 @@ export const tableHeadersRule = defineRule({
       }
     });
 
-    const dataTables = tables.filter((t) => !t.isLayout);
-    const tablesWithHeaders = dataTables.filter((t) => t.hasHeaders).length;
+    const dataTables = tables.filter((t: any) => !t.isLayout);
+    const tablesWithHeaders = dataTables.filter((t: any) => t.hasHeaders).length;
 
     if (dataTables.length === 0) {
       return pass('a11y-table-headers', 'No data tables found on page', {
-        layoutTables: tables.filter((t) => t.isLayout).length,
+        layoutTables: tables.filter((t: any) => t.isLayout).length,
       });
     }
 
@@ -143,7 +143,7 @@ export const tableHeadersRule = defineRule({
       });
     }
 
-    const noHeaderIssues = issues.filter((i) => i.issue.includes('No header'));
+    const noHeaderIssues = issues.filter((i: any) => i.issue.includes('No header'));
 
     if (noHeaderIssues.length > 0) {
       return fail(

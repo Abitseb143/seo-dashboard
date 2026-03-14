@@ -32,7 +32,7 @@ function analyzeRenderBlocking($: AuditContext['$']): RenderBlockingAnalysis {
   let moduleScripts = 0;
 
   // Analyze scripts in <head>
-  $('head script').each((_, el) => {
+  $('head script').each((_: number, el: any) => {
     const src = $(el).attr('src');
     const isAsync = $(el).attr('async') !== undefined;
     const isDefer = $(el).attr('defer') !== undefined;
@@ -59,7 +59,7 @@ function analyzeRenderBlocking($: AuditContext['$']): RenderBlockingAnalysis {
   });
 
   // Analyze scripts in <body> (less critical but can still block)
-  $('body script[src]').each((_, el) => {
+  $('body script[src]').each((_: number, el: any) => {
     const src = $(el).attr('src');
     const isAsync = $(el).attr('async') !== undefined;
     const isDefer = $(el).attr('defer') !== undefined;
@@ -76,7 +76,7 @@ function analyzeRenderBlocking($: AuditContext['$']): RenderBlockingAnalysis {
   });
 
   // Analyze CSS - any CSS without media query potentially blocks
-  $('head link[rel="stylesheet"]').each((_, el) => {
+  $('head link[rel="stylesheet"]').each((_: number, el: any) => {
     const href = $(el).attr('href');
     const media = $(el).attr('media');
 
@@ -120,7 +120,7 @@ export const renderBlockingRule = defineRule({
     let severity: 'pass' | 'warn' | 'fail' = 'pass';
 
     // Check blocking scripts
-    const blockingInHead = analysis.blockingScripts.filter((s) => s.inHead);
+    const blockingInHead = analysis.blockingScripts.filter((s: any) => s.inHead);
     if (blockingInHead.length > THRESHOLDS.blockingScripts.warning) {
       issues.push(`${blockingInHead.length} render-blocking scripts in <head>`);
       severity = 'fail';

@@ -18,7 +18,7 @@ const NAVIGATION_PATTERNS = [
  */
 function containsNavigation(onclick: string): boolean {
   const lower = onclick.toLowerCase();
-  return NAVIGATION_PATTERNS.some((pattern) => lower.includes(pattern));
+  return NAVIGATION_PATTERNS.some((pattern: any) => lower.includes(pattern));
 }
 
 /**
@@ -40,7 +40,7 @@ export const onclickRule = defineRule({
     const found: Array<{ element: string; onclick: string; text: string }> = [];
 
     // Check <a> elements with onclick containing navigation patterns
-    $('a[onclick]').each((_i, el) => {
+    $('a[onclick]').each((_i: any, el: any) => {
       const node = $(el);
       const onclick = node.attr('onclick') || '';
       if (containsNavigation(onclick)) {
@@ -53,7 +53,7 @@ export const onclickRule = defineRule({
     });
 
     // Check non-anchor elements that use onclick for navigation
-    $('span[onclick], div[onclick], button[onclick]').each((_i, el) => {
+    $('span[onclick], div[onclick], button[onclick]').each((_i: any, el: any) => {
       const node = $(el);
       const onclick = node.attr('onclick') || '';
       if (containsNavigation(onclick)) {

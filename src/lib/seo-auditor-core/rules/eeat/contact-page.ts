@@ -1,5 +1,5 @@
 import type { AuditContext, RuleResult } from '../../types';
-import { defineRule } from '../define-rule';
+import { defineRule, pass, warn } from '../define-rule';
 
 /**
  * Contact page detection patterns
@@ -72,7 +72,7 @@ export const contactPageRule = defineRule({
     const foundMethods: string[] = [];
 
     // Check for contact page links
-    $('a[href]').each((_, el) => {
+    $('a[href]').each((_: any, el: any) => {
       const href = $(el).attr('href') || '';
       const text = $(el).text().trim();
 
@@ -132,7 +132,7 @@ export const contactPageRule = defineRule({
     }
 
     // Check Schema.org ContactPoint
-    const hasSchemaContact = $('script[type="application/ld+json"]').filter((_, el) => {
+    const hasSchemaContact = $('script[type="application/ld+json"]').filter((_: any, el: any) => {
       const content = $(el).html() || '';
       return /ContactPoint|contactPoint/i.test(content);
     }).length > 0;
@@ -145,63 +145,43 @@ export const contactPageRule = defineRule({
     const methodCount = foundMethods.length;
 
     if (hasContactPage && methodCount >= 2) {
-      return {
-        status: 'pass',
-        score: 100,
-        message: `Contact page found with ${methodCount} contact methods`,
-        details: {
-          hasContactPage: true,
-          contactMethods: foundMethods,
-          links: foundLinks.slice(0, 3),
-        },
-      };
+      return pass('eeat-contact-page', `Contact page found with ${methodCount} contact methods`, {
+        hasContactPage: true,
+        contactMethods: foundMethods,
+        links: foundLinks.slice(0, 3),
+      });
     }
 
     if (hasContactPage || methodCount >= 2) {
-      return {
-        status: 'pass',
-        score: 100,
-        message: hasContactPage
-          ? `Contact page found${methodCount > 0 ? ` (${methodCount} contact method${methodCount > 1 ? 's' : ''} visible)` : ''}`
-          : `${methodCount} contact methods found on page`,
-        details: {
-          hasContactPage,
-          contactMethods: foundMethods,
-          links: foundLinks.slice(0, 3),
-        },
-      };
+      return pass('eeat-contact-page', hasContactPage
+        ? `Contact page found${methodCount > 0 ? ` (${methodCount} contact method${methodCount > 1 ? 's' : ''} visible)` : ''}`
+        : `${methodCount} contact methods found on page`, {
+        hasContactPage,
+        contactMethods: foundMethods,
+        links: foundLinks.slice(0, 3),
+      });
     }
 
     if (methodCount === 1) {
-      return {
-        status: 'warn',
-        score: 70,
-        message: `Only 1 contact method found (${foundMethods[0]}) - add more for better trust signals`,
-        details: {
-          hasContactPage: false,
-          contactMethods: foundMethods,
-          recommendation: 'Add a contact page with multiple ways to reach you: email, phone, form, and/or physical address',
-        },
-      };
+      return warn('eeat-contact-page', `Only 1 contact method found (${foundMethods[0]}) - add more for better trust signals`, {
+        hasContactPage: false,
+        contactMethods: foundMethods,
+        recommendation: 'Add a contact page with multiple ways to reach you: email, phone, form, and/or physical address',
+      });
     }
 
-    return {
-      status: 'warn',
-      score: 50,
-      message: 'No contact page or contact methods found - important for trust',
-      details: {
-        hasContactPage: false,
-        contactMethods: [],
-        recommendation: 'Add a contact page with multiple ways to reach you: email, phone, contact form, and physical address',
-      },
-    };
+    return warn('eeat-contact-page', 'No contact page or contact methods found - important for trust', {
+      hasContactPage: false,
+      contactMethods: [],
+      recommendation: 'Add a contact page with multiple ways to reach you: email, phone, contact form, and physical address',
+    });
   },
 });
 
 /**
  * Detect element location
  */
-function detectLocation($: cheerio.CheerioAPI, el: cheerio.Element): string {
+function detectLocation($: any, el: any): string {
   const parents = $(el).parents();
 
   for (let i = 0; i < parents.length; i++) {

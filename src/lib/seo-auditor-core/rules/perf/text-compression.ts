@@ -36,9 +36,9 @@ export const textCompressionRule = defineRule({
     }
 
     // Check if any supported encoding is present (content-encoding can have multiple values)
-    const encodingParts = encoding.split(',').map((e) => e.trim());
-    const matchedEncoding = encodingParts.find((e) =>
-      SUPPORTED_ENCODINGS.some((supported) => e === supported)
+    const encodingParts = encoding.split(',').map((e: any) => e.trim());
+    const matchedEncoding = encodingParts.find((e: any) =>
+      SUPPORTED_ENCODINGS.some((supported: any) => e === supported)
     );
 
     if (matchedEncoding) {

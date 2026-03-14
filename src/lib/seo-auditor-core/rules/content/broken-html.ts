@@ -28,7 +28,7 @@ export const brokenHtmlRule = defineRule({
 
     // 1. Check for duplicate IDs
     const ids = new Map<string, number>();
-    $('[id]').each((_, el) => {
+    $('[id]').each((_: any, el: any) => {
       const id = $(el).attr('id');
       if (id) {
         const count = ids.get(id) || 0;
@@ -75,7 +75,7 @@ export const brokenHtmlRule = defineRule({
     }
 
     // 4. Check for anchors without href
-    const anchorsWithoutHref = $('a:not([href]), a[href=""]').filter((_, el) => {
+    const anchorsWithoutHref = $('a:not([href]), a[href=""]').filter((_: any, el: any) => {
       // Exclude anchors that are just link targets (have name or id)
       return !$(el).attr('name') && !$(el).attr('id');
     });
@@ -88,7 +88,7 @@ export const brokenHtmlRule = defineRule({
     }
 
     // 5. Check for empty headings
-    $('h1, h2, h3, h4, h5, h6').each((_, el) => {
+    $('h1, h2, h3, h4, h5, h6').each((_: any, el: any) => {
       const text = $(el).text().trim();
       if (!text) {
         issues.push({
@@ -100,7 +100,7 @@ export const brokenHtmlRule = defineRule({
     });
 
     // 6. Check for empty buttons
-    $('button').each((_, el) => {
+    $('button').each((_: any, el: any) => {
       const text = $(el).text().trim();
       const hasAriaLabel = $(el).attr('aria-label');
       const hasTitle = $(el).attr('title');
@@ -114,8 +114,7 @@ export const brokenHtmlRule = defineRule({
     });
 
     // 7. Check for form inputs without labels
-    $('input:not([type="hidden"]):not([type="submit"]):not([type="button"])').each(
-      (_, el) => {
+    $('input:not([type="hidden"]):not([type="submit"]):not([type="button"])').each((_: any, el: any) => {
         const id = $(el).attr('id');
         const ariaLabel = $(el).attr('aria-label');
         const ariaLabelledBy = $(el).attr('aria-labelledby');
@@ -161,8 +160,7 @@ export const brokenHtmlRule = defineRule({
     }
 
     // Categorize issues
-    const criticalCount = issues.filter(
-      (i) => i.type === 'duplicate-id' || i.type === 'invalid-nesting'
+    const criticalCount = issues.filter((i: any) => i.type === 'duplicate-id' || i.type === 'invalid-nesting'
     ).length;
     const minorCount = issues.length - criticalCount;
 
@@ -172,12 +170,12 @@ export const brokenHtmlRule = defineRule({
       minorCount,
       issues: issues.slice(0, 15), // Limit to first 15
       categories: {
-        'duplicate-id': issues.filter((i) => i.type === 'duplicate-id').length,
-        'invalid-nesting': issues.filter((i) => i.type === 'invalid-nesting').length,
-        'missing-attribute': issues.filter((i) => i.type === 'missing-attribute').length,
-        'empty-element': issues.filter((i) => i.type === 'empty-element').length,
-        accessibility: issues.filter((i) => i.type === 'accessibility').length,
-        'deprecated-element': issues.filter((i) => i.type === 'deprecated-element').length,
+        'duplicate-id': issues.filter((i: any) => i.type === 'duplicate-id').length,
+        'invalid-nesting': issues.filter((i: any) => i.type === 'invalid-nesting').length,
+        'missing-attribute': issues.filter((i: any) => i.type === 'missing-attribute').length,
+        'empty-element': issues.filter((i: any) => i.type === 'empty-element').length,
+        accessibility: issues.filter((i: any) => i.type === 'accessibility').length,
+        'deprecated-element': issues.filter((i: any) => i.type === 'deprecated-element').length,
       },
     };
 

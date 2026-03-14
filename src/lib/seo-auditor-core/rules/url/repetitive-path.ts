@@ -24,8 +24,8 @@ export const repetitivePathRule = defineRule({
 
       const segments = pathname
         .split('/')
-        .filter((s) => s.length > 0)
-        .map((s) => s.toLowerCase());
+        .filter((s: any) => s.length > 0)
+        .map((s: any) => s.toLowerCase());
 
       const duplicates: string[] = [];
 
@@ -47,7 +47,7 @@ export const repetitivePathRule = defineRule({
 
       return fail(
         'url-repetitive-path',
-        `URL path contains repetitive segments: ${uniqueDuplicates.map((d) => `/${d}/${d}/`).join(', ')}`,
+        `URL path contains repetitive segments: ${uniqueDuplicates.map((d: any) => `/${d}/${d}/`).join(', ')}`,
         {
           url,
           path: pathname,

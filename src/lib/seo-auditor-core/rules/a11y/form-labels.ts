@@ -39,7 +39,7 @@ export const formLabelsRule = defineRule({
     const inputSelector =
       'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="image"])';
 
-    $(inputSelector).each((_, el) => {
+    $(inputSelector).each((_: any, el: any) => {
       const $el = $(el);
       labeledCount.total++;
 
@@ -54,7 +54,7 @@ export const formLabelsRule = defineRule({
     });
 
     // Check select elements
-    $('select').each((_, el) => {
+    $('select').each((_: any, el: any) => {
       const $el = $(el);
       labeledCount.total++;
 
@@ -68,7 +68,7 @@ export const formLabelsRule = defineRule({
     });
 
     // Check textarea elements
-    $('textarea').each((_, el) => {
+    $('textarea').each((_: any, el: any) => {
       const $el = $(el);
       labeledCount.total++;
 
@@ -115,7 +115,7 @@ export const formLabelsRule = defineRule({
   },
 });
 
-function hasLabel($: cheerio.CheerioAPI, $el: cheerio.Cheerio<cheerio.Element>): boolean {
+function hasLabel($: any, $el: any): boolean {
   // Check for aria-label
   if ($el.attr('aria-label')?.trim()) {
     return true;

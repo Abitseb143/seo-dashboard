@@ -80,7 +80,7 @@ export const paginationLoopRule = defineRule({
     };
 
     if (loops.length > 0) {
-      const loopRels = loops.map((l) => `rel="${l.rel}"`).join(' and ');
+      const loopRels = loops.map((l: any) => `rel="${l.rel}"`).join(' and ');
       return fail(
         'crawl-pagination-loop',
         `Pagination ${loopRels} points back to the current page (infinite loop)`,

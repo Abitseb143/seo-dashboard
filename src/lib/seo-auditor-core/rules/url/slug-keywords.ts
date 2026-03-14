@@ -113,8 +113,8 @@ function analyzeSlug(url: string): {
     // Extract slug segments (exclude empty segments and file extensions)
     const segments = path
       .split('/')
-      .filter((s) => s.length > 0)
-      .map((s) => s.replace(/\.[^.]+$/, '')); // Remove file extensions
+      .filter((s: any) => s.length > 0)
+      .map((s: any) => s.replace(/\.[^.]+$/, '')); // Remove file extensions
 
     if (segments.length === 0) {
       // Root path - always pass

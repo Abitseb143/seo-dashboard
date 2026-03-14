@@ -40,7 +40,7 @@ export const fontSizeRule = defineRule({
     // Check inline styles on text elements
     const textElements = 'p, span, div, li, td, th, label, a, button';
 
-    $(textElements).each((_, el) => {
+    $(textElements).each((_: any, el: any) => {
       const $el = $(el);
       const style = $el.attr('style') || '';
 
@@ -95,7 +95,7 @@ export const fontSizeRule = defineRule({
     });
 
     // Check style tags for problematic patterns
-    $('style').each((_, el) => {
+    $('style').each((_: any, el: any) => {
       const css = $(el).html() || '';
 
       // Find font-size declarations with small values
@@ -172,7 +172,7 @@ export const fontSizeRule = defineRule({
       );
     }
 
-    const criticalIssues = issues.filter(i =>
+    const criticalIssues = issues.filter((i: any) =>
       i.issue.includes('below 12px') || i.issue.includes('!important')
     );
 

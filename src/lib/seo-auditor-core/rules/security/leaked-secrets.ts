@@ -100,7 +100,7 @@ export const leakedSecretsRule = defineRule({
 
     // Get all inline script content
     const scriptContent: string[] = [];
-    $('script:not([src])').each((_, el) => {
+    $('script:not([src])').each((_: number, el: any) => {
       const content = $(el).html();
       if (content) scriptContent.push(content);
     });

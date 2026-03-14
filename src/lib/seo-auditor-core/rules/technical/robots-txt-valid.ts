@@ -26,7 +26,7 @@ function validateRobotsTxt(content: string): {
   userAgents: string[];
   sitemapUrls: string[];
 } {
-  const lines = content.split('\n').map((line) => line.trim());
+  const lines = content.split('\n').map((line: any) => line.trim());
   const issues: string[] = [];
   const userAgents: string[] = [];
   const sitemapUrls: string[] = [];

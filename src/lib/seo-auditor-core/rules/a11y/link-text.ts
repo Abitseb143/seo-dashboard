@@ -64,7 +64,7 @@ export const linkTextRule = defineRule({
     const linkTextMap = new Map<string, string[]>(); // text -> hrefs
     let totalLinks = 0;
 
-    $('a[href]').each((_, el) => {
+    $('a[href]').each((_: any, el: any) => {
       const $el = $(el);
       const href = $el.attr('href') || '';
       const text = getAccessibleText($, $el).toLowerCase().trim();
@@ -125,7 +125,7 @@ export const linkTextRule = defineRule({
     // Check for duplicate link text with different destinations
     const duplicates: Array<{ text: string; count: number }> = [];
     for (const [text, hrefs] of linkTextMap) {
-      const uniqueHrefs = new Set(hrefs.map((h) => normalizeHref(h)));
+      const uniqueHrefs = new Set(hrefs.map((h: any) => normalizeHref(h)));
       if (uniqueHrefs.size > 1 && hrefs.length > 1) {
         duplicates.push({ text, count: hrefs.length });
       }
@@ -179,8 +179,8 @@ export const linkTextRule = defineRule({
  * Get accessible text for a link, including aria-label and image alts
  */
 function getAccessibleText(
-  $: cheerio.CheerioAPI,
-  $el: cheerio.Cheerio<cheerio.Element>
+  $: any,
+  $el: any
 ): string {
   // aria-label takes precedence
   const ariaLabel = $el.attr('aria-label');

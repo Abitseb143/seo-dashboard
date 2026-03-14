@@ -22,7 +22,7 @@ export const altPresentRule = defineRule({
       );
     }
 
-    const missingAlt = images.filter((img) => !img.hasAlt);
+    const missingAlt = images.filter((img: any) => !img.hasAlt);
 
     if (missingAlt.length > 0) {
       const percentage = ((missingAlt.length / images.length) * 100).toFixed(1);
@@ -33,7 +33,7 @@ export const altPresentRule = defineRule({
         {
           missingCount: missingAlt.length,
           totalImages: images.length,
-          missingAltImages: missingAlt.slice(0, 10).map((img) => ({
+          missingAltImages: missingAlt.slice(0, 10).map((img: any) => ({
             src: img.src,
           })),
           suggestion: 'Add descriptive alt text to all images for accessibility and SEO benefits',

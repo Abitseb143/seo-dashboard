@@ -10,7 +10,7 @@ const EXCESSIVE_DELAY_THRESHOLD = 10;
  * Parse Crawl-delay value from robots.txt content for relevant user-agents
  */
 function parseCrawlDelay(content: string): { delay: number | null; userAgent: string | null } {
-  const lines = content.split('\n').map((line) => line.trim());
+  const lines = content.split('\n').map((line: any) => line.trim());
 
   let inRelevantUserAgent = false;
   let sawAnyUserAgent = false;

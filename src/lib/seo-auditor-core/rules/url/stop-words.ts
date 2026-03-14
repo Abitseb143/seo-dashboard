@@ -140,7 +140,7 @@ function analyzeStopWords(url: string): {
     const path = urlObj.pathname;
 
     // Extract words from path segments
-    const segments = path.split('/').filter((s) => s.length > 0);
+    const segments = path.split('/').filter((s: any) => s.length > 0);
 
     // Split segments by hyphens/underscores to get individual words
     const words: string[] = [];
@@ -151,8 +151,8 @@ function analyzeStopWords(url: string): {
       const segmentWords = cleanSegment
         .split(/[-_]/)
         .flatMap((w) => w.split(/(?=[A-Z])/))
-        .map((w) => w.toLowerCase())
-        .filter((w) => w.length > 0);
+        .map((w: any) => w.toLowerCase())
+        .filter((w: any) => w.length > 0);
       words.push(...segmentWords);
     }
 
@@ -167,7 +167,7 @@ function analyzeStopWords(url: string): {
     }
 
     // Find stop words (excluding important compound words)
-    const stopWords = words.filter((word) => {
+    const stopWords = words.filter((word: any) => {
       // Check if it's part of a compound word we should keep
       for (const keep of KEEP_WORDS) {
         if (path.toLowerCase().includes(keep)) {
@@ -186,7 +186,7 @@ function analyzeStopWords(url: string): {
     const suggestions: string[] = [];
     if (stopWords.length > 0) {
       // Suggest URL without stop words
-      const nonStopWords = words.filter((w) => !STOP_WORDS.has(w));
+      const nonStopWords = words.filter((w: any) => !STOP_WORDS.has(w));
       if (nonStopWords.length > 0) {
         suggestions.push(`Consider: /${nonStopWords.join('-')}`);
       }

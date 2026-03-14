@@ -1,5 +1,5 @@
 import type { AuditContext, RuleResult } from '../../types';
-import { defineRule } from '../define-rule';
+import { defineRule, pass } from '../define-rule';
 
 /**
  * Trust badge and certification patterns
@@ -169,7 +169,7 @@ export const trustSignalsRule = defineRule({
       for (const selector of config.selectors) {
         if ($(selector).length > 0) {
           const text = $(selector).first().text().trim().slice(0, 50);
-          const existingForCategory = foundSignals.find((s) => s.type === category);
+          const existingForCategory = foundSignals.find((s: any) => s.type === category);
           if (!existingForCategory) {
             foundSignals.push({
               type: category,
@@ -182,12 +182,12 @@ export const trustSignalsRule = defineRule({
     }
 
     // Check for Schema.org Review/Rating
-    const hasSchemaReviews = $('script[type="application/ld+json"]').filter((_, el) => {
+    const hasSchemaReviews = $('script[type="application/ld+json"]').filter((_: any, el: any) => {
       const content = $(el).html() || '';
       return /Review|AggregateRating|rating/i.test(content);
     }).length > 0;
 
-    if (hasSchemaReviews && !foundSignals.find((s) => s.type === 'reviews')) {
+    if (hasSchemaReviews && !foundSignals.find((s: any) => s.type === 'reviews')) {
       foundSignals.push({
         type: 'reviews',
         evidence: 'Schema.org Review/Rating markup',
@@ -197,7 +197,7 @@ export const trustSignalsRule = defineRule({
     // Check for social proof numbers
     const socialProofPattern = /(\d{1,3}(,\d{3})*|\d+[kKmM]?)\+?\s*(customers?|users?|clients?|subscribers?|downloads?|reviews?)/gi;
     const socialProofMatch = bodyText.match(socialProofPattern);
-    if (socialProofMatch && !foundSignals.find((s) => s.type === 'media')) {
+    if (socialProofMatch && !foundSignals.find((s: any) => s.type === 'media')) {
       foundSignals.push({
         type: 'social-proof',
         evidence: `Text: "${socialProofMatch[0].slice(0, 50)}"`,
@@ -216,55 +216,35 @@ export const trustSignalsRule = defineRule({
     const uniqueTypes = Object.keys(signalsByType);
 
     if (uniqueTypes.length >= 3) {
-      return {
-        status: 'pass',
-        score: 100,
-        message: `Strong trust signals: ${uniqueTypes.length} types of social proof found`,
-        details: {
-          signalCount: foundSignals.length,
-          signalTypes: uniqueTypes,
-          signals: signalsByType,
-        },
-      };
+      return pass('eeat-trust-signals', `Strong trust signals: ${uniqueTypes.length} types of social proof found`, {
+        signalCount: foundSignals.length,
+        signalTypes: uniqueTypes,
+        signals: signalsByType,
+      });
     }
 
     if (uniqueTypes.length >= 2) {
-      return {
-        status: 'pass',
-        score: 90,
-        message: `Trust signals found: ${uniqueTypes.join(', ')}`,
-        details: {
-          signalCount: foundSignals.length,
-          signalTypes: uniqueTypes,
-          signals: signalsByType,
-          recommendation: 'Consider adding more trust signals: reviews, certifications, media mentions',
-        },
-      };
+      return pass('eeat-trust-signals', `Trust signals found: ${uniqueTypes.join(', ')}`, {
+        signalCount: foundSignals.length,
+        signalTypes: uniqueTypes,
+        signals: signalsByType,
+        recommendation: 'Consider adding more trust signals: reviews, certifications, media mentions',
+      });
     }
 
     if (uniqueTypes.length === 1) {
-      return {
-        status: 'pass',
-        score: 80,
-        message: `Trust signal found: ${uniqueTypes[0]}`,
-        details: {
-          signalCount: foundSignals.length,
-          signalTypes: uniqueTypes,
-          signals: signalsByType,
-          recommendation: 'Add more types of trust signals: customer reviews, certifications, security badges, media mentions',
-        },
-      };
+      return pass('eeat-trust-signals', `Trust signal found: ${uniqueTypes[0]}`, {
+        signalCount: foundSignals.length,
+        signalTypes: uniqueTypes,
+        signals: signalsByType,
+        recommendation: 'Add more types of trust signals: customer reviews, certifications, security badges, media mentions',
+      });
     }
 
-    return {
-      status: 'pass',
-      score: 100,
-      message: 'No trust signals detected (may not be required for this site type)',
-      details: {
-        signalCount: 0,
-        signalTypes: [],
-        recommendation: 'Add trust signals: customer reviews/testimonials, certifications, security badges, media mentions, or client logos',
-      },
-    };
+    return pass('eeat-trust-signals', 'No trust signals detected (may not be required for this site type)', {
+      signalCount: 0,
+      signalTypes: [],
+      recommendation: 'Add trust signals: customer reviews/testimonials, certifications, security badges, media mentions, or client logos',
+    });
   },
 });

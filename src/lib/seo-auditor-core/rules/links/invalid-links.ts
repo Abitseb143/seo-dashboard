@@ -15,7 +15,7 @@ export const invalidLinksRule = defineRule({
   category: 'links',
   weight: 1,
   run: (context: AuditContext) => {
-    const { invalidLinks } = context;
+    const invalidLinks = context.invalidLinks || [];
 
     if (invalidLinks.length === 0) {
       return pass(
@@ -51,7 +51,7 @@ export const invalidLinksRule = defineRule({
       {
         invalidCount: invalidLinks.length,
         byReason,
-        invalidLinks: invalidLinks.slice(0, 10).map((l) => ({
+        invalidLinks: invalidLinks.slice(0, 10).map((l: any) => ({
           href: l.href,
           reason: l.reason,
           text: l.text,

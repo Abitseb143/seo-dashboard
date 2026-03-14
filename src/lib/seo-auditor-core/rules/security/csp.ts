@@ -73,8 +73,7 @@ export const cspRule = defineRule({
 
     // CSP is present
     const directives = parseCspDirectives(cspHeader);
-    const missingRecommended = RECOMMENDED_DIRECTIVES.filter(
-      (d) => !directives.includes(d)
+    const missingRecommended = RECOMMENDED_DIRECTIVES.filter((d: any) => !directives.includes(d)
     );
 
     const details = {

@@ -32,7 +32,7 @@ function parseRobotsTxt(content: string): {
   disallowedPaths: string[];
   allowedPaths: string[];
 } {
-  const lines = content.split('\n').map((line) => line.trim());
+  const lines = content.split('\n').map((line: any) => line.trim());
   const disallowedPaths: string[] = [];
   const allowedPaths: string[] = [];
 
@@ -169,8 +169,7 @@ export const indexabilityConflictRule = defineRule({
         for (const rule of disallowedPaths) {
           if (pathMatchesRule(pagePath, rule)) {
             // Check if there's a more specific allow rule
-            const hasAllowOverride = allowedPaths.some(
-              (allowRule) =>
+            const hasAllowOverride = allowedPaths.some((allowRule: any) =>
                 pathMatchesRule(pagePath, allowRule) && allowRule.length >= rule.length
             );
             if (!hasAllowOverride) {

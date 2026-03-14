@@ -56,7 +56,7 @@ export const invalidHeadRule = defineRule({
 
     const invalidElements: string[] = [];
 
-    head.children().each((_, el) => {
+    head.children().each((_: any, el: any) => {
       if (el.type === 'tag') {
         const tagName = el.tagName.toLowerCase();
         if (INVALID_HEAD_ELEMENTS.has(tagName)) {

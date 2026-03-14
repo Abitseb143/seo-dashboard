@@ -1,4 +1,4 @@
-import type { CheerioAPI } from 'cheerio';
+// Cheerio types are causing build issues in production environment, using any as a fallback
 
 /**
  * Represents a typed item extracted from JSON-LD
@@ -17,11 +17,11 @@ export interface TypedItem {
  * Parses each script and returns valid JSON objects
  * Skips empty or invalid JSON scripts
  */
-export function extractJsonLdScripts($: CheerioAPI): unknown[] {
+export function extractJsonLdScripts($: any): unknown[] {
   const results: unknown[] = [];
   const jsonLdScripts = $('script[type="application/ld+json"]');
 
-  jsonLdScripts.each((_, element) => {
+  jsonLdScripts.each((_: any, element: any) => {
     const rawContent = $(element).html() || '';
     const trimmedContent = rawContent.trim();
 
@@ -74,7 +74,7 @@ export function extractTypedItems(data: unknown): TypedItem[] {
       ? (obj['@type'] as string[])
       : [obj['@type'] as string];
 
-    const fields = Object.keys(obj).filter((k) => !k.startsWith('@'));
+    const fields = Object.keys(obj).filter((k: any) => !k.startsWith('@'));
 
     for (const type of types) {
       items.push({
@@ -100,7 +100,7 @@ export function extractTypedItems(data: unknown): TypedItem[] {
  * Find all items of a specific type (or types) in JSON-LD scripts
  */
 export function findItemsByType(
-  $: CheerioAPI,
+  $: any,
   targetTypes: string | string[]
 ): TypedItem[] {
   const targets = Array.isArray(targetTypes) ? targetTypes : [targetTypes];
@@ -111,7 +111,7 @@ export function findItemsByType(
     allItems.push(...extractTypedItems(script));
   }
 
-  return allItems.filter((item) => targets.includes(item.type));
+  return allItems.filter((item: any) => targets.includes(item.type));
 }
 
 /**
@@ -142,5 +142,5 @@ export function hasField(item: TypedItem, field: string): boolean {
  * Returns field names that fail the hasField check
  */
 export function getMissingFields(item: TypedItem, required: string[]): string[] {
-  return required.filter((field) => !hasField(item, field));
+  return required.filter((field: any) => !hasField(item, field));
 }

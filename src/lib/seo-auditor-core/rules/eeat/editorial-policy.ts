@@ -1,5 +1,5 @@
 import type { AuditContext, RuleResult } from '../../types';
-import { defineRule } from '../define-rule';
+import { defineRule, pass, warn } from '../define-rule';
 
 /**
  * Editorial policy page detection patterns
@@ -74,7 +74,7 @@ export const editorialPolicyRule = defineRule({
     const foundSignals: string[] = [];
 
     // Check for editorial policy links
-    $('a[href]').each((_, el) => {
+    $('a[href]').each((_: any, el: any) => {
       const href = $(el).attr('href') || '';
       const text = $(el).text().trim();
 
@@ -109,7 +109,7 @@ export const editorialPolicyRule = defineRule({
 
     // Check for Schema.org NewsArticle with review info
     let hasSchemaEditorial = false;
-    $('script[type="application/ld+json"]').each((_, el) => {
+    $('script[type="application/ld+json"]').each((_: any, el: any) => {
       try {
         const content = $(el).html();
         if (content) {
@@ -146,68 +146,43 @@ export const editorialPolicyRule = defineRule({
     ).length > 0;
 
     if (foundLinks.length > 0) {
-      return {
-        status: 'pass',
-        score: 100,
-        message: `Editorial policy page found${foundSignals.length > 0 ? ` with ${foundSignals.length} editorial signal${foundSignals.length > 1 ? 's' : ''}` : ''}`,
-        details: {
-          hasEditorialPolicy: true,
-          links: foundLinks.slice(0, 3),
-          signals: foundSignals,
-        },
-      };
+      return pass('eeat-editorial-policy', `Editorial policy page found${foundSignals.length > 0 ? ` with ${foundSignals.length} editorial signal${foundSignals.length > 1 ? 's' : ''}` : ''}`, {
+        hasEditorialPolicy: true,
+        links: foundLinks.slice(0, 3),
+        signals: foundSignals,
+      });
     }
 
     if (foundSignals.length >= 2) {
-      return {
-        status: 'pass',
-        score: 80,
-        message: `Editorial signals found (${foundSignals.join(', ')}) but no dedicated policy page`,
-        details: {
-          hasEditorialPolicy: false,
-          signals: foundSignals,
-          recommendation: 'Consider creating a dedicated editorial policy page explaining your content standards',
-        },
-      };
+      return pass('eeat-editorial-policy', `Editorial signals found (${foundSignals.join(', ')}) but no dedicated policy page`, {
+        hasEditorialPolicy: false,
+        signals: foundSignals,
+        recommendation: 'Consider creating a dedicated editorial policy page explaining your content standards',
+      });
     }
 
     if (foundSignals.length === 1) {
-      return {
-        status: 'pass',
-        score: 90,
-        message: `Editorial signal found (${foundSignals[0]}) - consider adding editorial policy page`,
-        details: {
-          hasEditorialPolicy: false,
-          signals: foundSignals,
-          recommendation: 'Create an editorial policy page to document your content quality standards',
-        },
-      };
+      return pass('eeat-editorial-policy', `Editorial signal found (${foundSignals[0]}) - consider adding editorial policy page`, {
+        hasEditorialPolicy: false,
+        signals: foundSignals,
+        recommendation: 'Create an editorial policy page to document your content quality standards',
+      });
     }
 
     // No editorial policy - warn for content sites
     if (isContentSite) {
-      return {
-        status: 'warn',
-        score: 50,
-        message: 'No editorial policy found - recommended for content-focused sites',
-        details: {
-          hasEditorialPolicy: false,
-          signals: [],
-          isContentSite: true,
-          recommendation: 'Add an editorial policy page explaining your content creation, review, and correction processes',
-        },
-      };
-    }
-
-    return {
-      status: 'pass',
-      score: 100,
-      message: 'No editorial policy (may not be applicable for this site type)',
-      details: {
+      return warn('eeat-editorial-policy', 'No editorial policy found - recommended for content-focused sites', {
         hasEditorialPolicy: false,
         signals: [],
-        isContentSite: false,
-      },
-    };
+        isContentSite: true,
+        recommendation: 'Add an editorial policy page explaining your content creation, review, and correction processes',
+      });
+    }
+
+    return pass('eeat-editorial-policy', 'No editorial policy (may not be applicable for this site type)', {
+      hasEditorialPolicy: false,
+      signals: [],
+      isContentSite: false,
+    });
   },
 });

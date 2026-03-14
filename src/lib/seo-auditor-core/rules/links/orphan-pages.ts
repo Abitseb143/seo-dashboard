@@ -25,7 +25,7 @@ export const orphanPagesRule = defineRule({
     const { links } = context;
 
     // Count incoming internal links this page would provide to other pages
-    const outgoingInternalLinks = links.filter((link) => link.isInternal);
+    const outgoingInternalLinks = links.filter((link: any) => link.isInternal);
 
     // In single-page mode, we can only report what this page links to
     // Full orphan detection requires crawl-wide analysis

@@ -34,8 +34,7 @@ export function getAllRules(): AuditRule[] {
  * @returns Array of rules in the specified category
  */
 export function getRulesByCategory(categoryId: string): AuditRule[] {
-  return Array.from(rules.values()).filter(
-    (rule) => rule.category === categoryId
+  return Array.from(rules.values()).filter((rule: any) => rule.category === categoryId
   );
 }
 

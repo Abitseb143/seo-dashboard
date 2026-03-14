@@ -39,7 +39,7 @@ export const hreflangToNoindexRule = defineRule({
     let hasNoindex = false;
     let noindexSource = '';
 
-    $('meta[name="robots"], meta[name="googlebot"]').each((_, el) => {
+    $('meta[name="robots"], meta[name="googlebot"]').each((_: any, el: any) => {
       const content = ($(el).attr('content') || '').toLowerCase();
       if (content.includes('noindex')) {
         hasNoindex = true;

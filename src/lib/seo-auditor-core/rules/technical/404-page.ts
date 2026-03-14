@@ -87,12 +87,12 @@ function analyze404Page(
   const indicators: string[] = [];
 
   // Check for default error signatures (strong indicator of default page)
-  const hasDefaultSignatures = DEFAULT_ERROR_SIGNATURES.filter((sig) =>
+  const hasDefaultSignatures = DEFAULT_ERROR_SIGNATURES.filter((sig: any) =>
     lowerHtml.includes(sig.toLowerCase())
   );
 
   // Check for custom page indicators
-  const hasCustomIndicators = CUSTOM_404_INDICATORS.filter((ind) =>
+  const hasCustomIndicators = CUSTOM_404_INDICATORS.filter((ind: any) =>
     lowerHtml.includes(ind.toLowerCase())
   );
 

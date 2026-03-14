@@ -48,7 +48,7 @@ export const minifyCssRule = defineRule({
     let totalInlineCss = '';
     let styleTagCount = 0;
 
-    $('style').each((_, el) => {
+    $('style').each((_: number, el: any) => {
       const content = $(el).html() || '';
       if (content.trim().length > 0) {
         totalInlineCss += content;

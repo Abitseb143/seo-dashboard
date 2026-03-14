@@ -14,7 +14,7 @@ export const telMailtoRule = defineRule({
   category: 'links',
   weight: 1,
   run: (context: AuditContext) => {
-    const { specialLinks } = context;
+    const specialLinks = context.specialLinks || [];
 
     if (specialLinks.length === 0) {
       return pass(
@@ -24,11 +24,11 @@ export const telMailtoRule = defineRule({
       );
     }
 
-    const invalidLinks = specialLinks.filter((link) => !link.isValid);
+    const invalidLinks = specialLinks.filter((link: any) => !link.isValid);
 
     if (invalidLinks.length === 0) {
-      const telCount = specialLinks.filter((l) => l.type === 'tel').length;
-      const mailtoCount = specialLinks.filter((l) => l.type === 'mailto').length;
+      const telCount = specialLinks.filter((l: any) => l.type === 'tel').length;
+      const mailtoCount = specialLinks.filter((l: any) => l.type === 'mailto').length;
 
       return pass(
         'links-tel-mailto',
@@ -42,8 +42,8 @@ export const telMailtoRule = defineRule({
     }
 
     // Group by type
-    const invalidTel = invalidLinks.filter((l) => l.type === 'tel');
-    const invalidMailto = invalidLinks.filter((l) => l.type === 'mailto');
+    const invalidTel = invalidLinks.filter((l: any) => l.type === 'tel');
+    const invalidMailto = invalidLinks.filter((l: any) => l.type === 'mailto');
 
     const issues: string[] = [];
     if (invalidTel.length > 0) {
@@ -61,7 +61,7 @@ export const telMailtoRule = defineRule({
         invalidCount: invalidLinks.length,
         invalidTelCount: invalidTel.length,
         invalidMailtoCount: invalidMailto.length,
-        invalidLinks: invalidLinks.slice(0, 10).map((l) => ({
+        invalidLinks: invalidLinks.slice(0, 10).map((l: any) => ({
           type: l.type,
           href: l.href,
           value: l.value,

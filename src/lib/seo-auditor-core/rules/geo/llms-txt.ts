@@ -54,7 +54,7 @@ export const llmsTxtRule = defineRule({
 
     // Check for anchor links pointing to llms.txt paths
     const llmsPaths = ['/llms.txt', '/.well-known/llms.txt'];
-    $('a[href]').each((_, el) => {
+    $('a[href]').each((_: any, el: any) => {
       const href = $(el).attr('href') || '';
       for (const path of llmsPaths) {
         if (href === path || href.endsWith(path)) {
@@ -65,7 +65,7 @@ export const llmsTxtRule = defineRule({
     });
 
     // Also check <link> tags with href containing llms.txt
-    $('link[href]').each((_, el) => {
+    $('link[href]').each((_: any, el: any) => {
       const href = $(el).attr('href') || '';
       const rel = $(el).attr('rel') || '';
       // Skip the rel="llms" we already checked

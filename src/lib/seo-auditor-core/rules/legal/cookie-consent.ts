@@ -1,5 +1,5 @@
 import type { AuditContext, RuleResult } from '../../types';
-import { defineRule } from '../define-rule';
+import { defineRule, pass, warn } from '../define-rule';
 
 /**
  * Cookie consent detection patterns
@@ -95,7 +95,7 @@ export const cookieConsentRule = defineRule({
     const issues: string[] = [];
 
     // Check for consent platform scripts
-    $('script[src]').each((_, el) => {
+    $('script[src]').each((_: number, el: any) => {
       const src = $(el).attr('src') || '';
       for (const platform of CONSENT_PATTERNS.scripts) {
         if (src.includes(platform)) {
@@ -107,7 +107,7 @@ export const cookieConsentRule = defineRule({
 
     // Check for consent elements by class/ID
     const allElements = $('[class], [id]');
-    allElements.each((_, el) => {
+    allElements.each((_: number, el: any) => {
       const className = $(el).attr('class') || '';
       const id = $(el).attr('id') || '';
       const combined = `${className} ${id}`.toLowerCase();
@@ -130,7 +130,7 @@ export const cookieConsentRule = defineRule({
     });
 
     // Check for consent-related buttons
-    $('button, a, [role="button"]').each((_, el) => {
+    $('button, a, [role="button"]').each((_: number, el: any) => {
       const text = $(el).text().trim();
       for (const pattern of CONSENT_PATTERNS.buttons) {
         if (pattern.test(text)) {
@@ -141,7 +141,7 @@ export const cookieConsentRule = defineRule({
     });
 
     // Check for inline scripts with consent logic
-    $('script:not([src])').each((_, el) => {
+    $('script:not([src])').each((_: number, el: any) => {
       const content = $(el).html() || '';
       if (
         /cookie.?consent|gdpr.?consent|accept.?cookies|cookie.?banner/i.test(content) &&
@@ -156,15 +156,10 @@ export const cookieConsentRule = defineRule({
     const uniqueDetected = [...new Set(detected)];
 
     if (uniqueDetected.length > 0) {
-      return {
-        status: 'pass',
-        score: 100,
-        message: `Cookie consent mechanism detected (${uniqueDetected.length} indicator${uniqueDetected.length > 1 ? 's' : ''})`,
-        details: {
-          detected: uniqueDetected.slice(0, 5), // Limit to 5 for readability
-          hasConsent: true,
-        },
-      };
+      return pass('legal-cookie-consent', `Cookie consent mechanism detected (${uniqueDetected.length} indicator${uniqueDetected.length > 1 ? 's' : ''})`, {
+        detected: uniqueDetected.slice(0, 5), // Limit to 5 for readability
+        hasConsent: true,
+      });
     }
 
     // Check if the site likely needs consent (has tracking/analytics)
@@ -172,27 +167,17 @@ export const cookieConsentRule = defineRule({
 
     if (hasTracking) {
       issues.push('Tracking scripts detected but no cookie consent mechanism found');
-      return {
-        status: 'warn',
-        score: 50,
-        message: 'No cookie consent mechanism detected (tracking scripts present)',
-        details: {
-          hasConsent: false,
-          hasTracking: true,
-          issues,
-        },
-      };
+      return warn('legal-cookie-consent', 'No cookie consent mechanism detected (tracking scripts present)', {
+        hasConsent: false,
+        hasTracking: true,
+        issues,
+      });
     }
 
     // No consent mechanism found, but may not be required
-    return {
-      status: 'pass',
-      score: 100,
-      message: 'No cookie consent mechanism detected (may not be required if no tracking cookies used)',
-      details: {
-        hasConsent: false,
-        hasTracking: false,
-      },
-    };
+    return pass('legal-cookie-consent', 'No cookie consent mechanism detected (may not be required if no tracking cookies used)', {
+      hasConsent: false,
+      hasTracking: false,
+    });
   },
 });

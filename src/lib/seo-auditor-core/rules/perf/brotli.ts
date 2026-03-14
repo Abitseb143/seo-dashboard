@@ -29,8 +29,8 @@ export const brotliRule = defineRule({
       );
     }
 
-    const encodingParts = encoding.split(',').map((e) => e.trim());
-    const usesBrotli = encodingParts.some((e) => e === 'br');
+    const encodingParts = encoding.split(',').map((e: any) => e.trim());
+    const usesBrotli = encodingParts.some((e: any) => e === 'br');
 
     if (usesBrotli) {
       return pass(
@@ -40,7 +40,7 @@ export const brotliRule = defineRule({
       );
     }
 
-    const usesGzip = encodingParts.some((e) => e === 'gzip');
+    const usesGzip = encodingParts.some((e: any) => e === 'gzip');
 
     if (usesGzip) {
       return warn(
