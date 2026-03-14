@@ -11,24 +11,42 @@ export default function TopBar() {
 
     const handleRunAudit = async () => {
         if (!targetUrl) return;
+        
+        // Normalize URL: Ensure it starts with a protocol
+        let normalizedUrl = targetUrl.trim();
+        if (!/^https?:\/\//i.test(normalizedUrl)) {
+            normalizedUrl = `https://${normalizedUrl}`;
+        }
+        
         setIsRunning(true);
         try {
-            await fetch("/api/audits/create", {
+            const res = await fetch("/api/audits/create", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    targetUrls: [targetUrl],
-                    projectName: new URL(targetUrl).hostname || targetUrl
+                    targetUrls: [normalizedUrl],
+                    projectName: (() => {
+                        try {
+                            return new URL(normalizedUrl).hostname;
+                        } catch (e) {
+                            return normalizedUrl.replace(/^https?:\/\//i, '').split('/')[0] || "SEO Project";
+                        }
+                    })()
                 }),
             });
-            // Refresh current dashboard view to fetch latest info
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.error || "Failed to start audit. Check your internet connection.");
+            }
+
+            // Refresh current dashboard view
             router.refresh();
-            // Optional: Give it a slight delay to ensure DB propagation and fresh data fetch
-            setTimeout(() => {
-                window.location.reload();
-            }, 500);
-        } catch (error) {
+            window.location.reload();
+        } catch (error: any) {
             console.error("Failed to run audit:", error);
+            // If it's a server error, we try to show the specific details if available
+            alert(`Audit Error: ${error.message}`);
         } finally {
             setIsRunning(false);
         }
@@ -48,7 +66,7 @@ export default function TopBar() {
                 </span>
             </div>
             <div className="flex items-center gap-4 flex-1 justify-end">
-                <div className="relative group max-w-sm w-full hidden md:block">
+                <div className="relative group max-w-xs w-full hidden md:block">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                         <LinkIcon size={16} />
                     </div>
@@ -56,10 +74,12 @@ export default function TopBar() {
                         type="url"
                         value={targetUrl}
                         onChange={(e) => setTargetUrl(e.target.value)}
-                        placeholder="Enter website URL to audit..."
+                        placeholder="Enter website URL..."
                         className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all shadow-sm"
                     />
                 </div>
+
+
 
                 <button
                     onClick={handleRunAudit}

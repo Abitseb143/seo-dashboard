@@ -16,16 +16,26 @@ function calculatePriorityRank(severity: string, impact: number, difficulty: num
 
 export async function POST(req: Request) {
     try {
-        const body = await req.json();
-        const { targetUrls, projectId, projectName } = body;
+        const body = await req.json().catch(e => {
+            console.error("[Audit API] JSON Parse Error:", e);
+            return null;
+        });
 
-        if (!targetUrls || !Array.isArray(targetUrls)) {
-            return NextResponse.json({ error: "targetUrls array is required" }, { status: 400 });
+        if (!body) {
+            return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+        }
+
+        const { targetUrls, projectId, projectName } = body;
+        console.log("[Audit API] Received request for:", { targetUrls, projectName });
+
+        if (!targetUrls || !Array.isArray(targetUrls) || targetUrls.length === 0) {
+            return NextResponse.json({ error: "At least one target URL is required" }, { status: 400 });
         }
 
         // Optional: Use existing project or create a new dummy one
         let dbProjectId = projectId;
         if (!dbProjectId) {
+            console.log("[Audit API] Creating new project for:", targetUrls[0]);
             const p = await prisma.project.create({
                 data: {
                     url: targetUrls[0] || "https://www.synthera.com.au/",
@@ -36,99 +46,105 @@ export async function POST(req: Request) {
         }
 
         // Create Audit
+        console.log("[Audit API] Creating audit record for project:", dbProjectId);
         const audit = await prisma.audit.create({
             data: {
                 projectId: dbProjectId,
-                overallScore: 0, // We will calculate this
+                overallScore: 0,
                 status: "RUNNING",
             },
-            include: { pageAudits: true },
         });
 
         let totalScore = 0;
+        try {
+            for (const url of targetUrls) {
+                console.log(`[Audit] Starting live SEO audit for: ${url}`);
+                const liveIssues = await runLiveSEOAudit(url);
+                console.log(`[Audit] Audit engine returned ${liveIssues.length} issues for ${url}`);
 
-        for (const url of targetUrls) {
-            console.log(`[Audit] Starting live SEO audit for: ${url}`);
-            const liveIssues = await runLiveSEOAudit(url);
-            console.log(`[Audit] Audit engine returned ${liveIssues.length} issues for ${url}`);
+                const pageScore = Math.max(0, 100 - (liveIssues.length * 5));
+                totalScore += pageScore;
 
-            const pageScore = Math.max(0, 100 - (liveIssues.length * 5));
-            totalScore += pageScore;
+                const pageAudit = await prisma.pageAudit.create({
+                    data: {
+                        auditId: audit.id,
+                        url,
+                        pageScore,
+                    },
+                });
 
-            const pageAudit = await prisma.pageAudit.create({
-                data: {
-                    auditId: audit.id,
-                    url,
-                    pageScore,
-                },
-            });
+                console.log(`[Audit] Saving ${liveIssues.length} issues to database...`);
+                for (const issue of liveIssues) {
+                    const priorityRank = calculatePriorityRank(
+                        issue.severity,
+                        issue.expectedSEOImpact,
+                        issue.implementationDifficulty
+                    );
 
-            console.log(`[Audit] Saving ${liveIssues.length} issues to database...`);
-            for (const issue of liveIssues) {
-                const priorityRank = calculatePriorityRank(
-                    issue.severity,
-                    issue.expectedSEOImpact,
-                    issue.implementationDifficulty
-                );
-
-                try {
-                    await prisma.issue.create({
-                        data: {
-                            pageAuditId: pageAudit.id,
-                            category: issue.category,
-                            severity: issue.severity,
-                            issueTitle: issue.issueTitle,
-                            problemSummary: issue.problemSummary,
-                            whyItMatters: issue.whyItMatters,
-                            currentState: issue.currentState,
-                            pageUrl: issue.pageUrl || url,
-                            recommendedFix: {
-                                create: {
-                                    recommendedAction: issue.recommendedAction,
-                                    bestFixOption: issue.bestFixOption,
-                                    alternativeFixOptions: issue.alternativeFixOptions,
-                                    expectedSEOImpact: issue.expectedSEOImpact,
-                                    implementationDifficulty: issue.implementationDifficulty,
-                                    estimatedEffort: issue.estimatedEffort,
-                                    codeExample: issue.codeExample,
-                                    cmsInstruction: issue.cmsInstruction,
-                                    priorityRank,
-                                    confidenceLevel: issue.confidenceLevel,
+                    try {
+                        await prisma.issue.create({
+                            data: {
+                                pageAuditId: pageAudit.id,
+                                category: issue.category,
+                                severity: issue.severity,
+                                issueTitle: issue.issueTitle,
+                                problemSummary: issue.problemSummary,
+                                whyItMatters: issue.whyItMatters,
+                                currentState: issue.currentState,
+                                pageUrl: issue.pageUrl || url,
+                                recommendedFix: {
+                                    create: {
+                                        recommendedAction: issue.recommendedAction,
+                                        bestFixOption: issue.bestFixOption,
+                                        alternativeFixOptions: issue.alternativeFixOptions,
+                                        expectedSEOImpact: issue.expectedSEOImpact,
+                                        implementationDifficulty: issue.implementationDifficulty,
+                                        estimatedEffort: issue.estimatedEffort,
+                                        codeExample: issue.codeExample,
+                                        cmsInstruction: issue.cmsInstruction,
+                                        priorityRank,
+                                        confidenceLevel: issue.confidenceLevel,
+                                    },
                                 },
                             },
-                        },
-                    });
-                } catch (e: any) {
-                    console.error(`[Audit] Failed to save issue "${issue.issueTitle}":`, e.message);
+                        });
+                    } catch (e: any) {
+                        console.error(`[Audit] Failed to save issue "${issue.issueTitle}":`, e.message);
+                    }
                 }
             }
+
+            const overallScore = totalScore / targetUrls.length;
+            await prisma.audit.update({
+                where: { id: audit.id },
+                data: {
+                    overallScore,
+                    status: "COMPLETED",
+                },
+            });
+            
+            console.log(`[Audit API] Audit ${audit.id} finished successfully with score: ${overallScore}`);
+
+        } catch (auditError: any) {
+            console.error(`[Audit API] Audit ${audit.id} failed:`, auditError);
+            await prisma.audit.update({
+                where: { id: audit.id },
+                data: { status: "FAILED" }
+            }).catch(() => { });
+            throw auditError;
         }
 
-        const overallScore = totalScore / targetUrls.length;
-        await prisma.audit.update({
-            where: { id: audit.id },
-            data: {
-                overallScore,
-                status: "COMPLETED",
-            },
-        });
-
-        console.log(`[Audit] Audit ${audit.id} finished successfully.`);
         return NextResponse.json({
             success: true,
             auditId: audit.id,
-            overallScore,
+            overallScore: targetUrls.length > 0 ? totalScore / targetUrls.length : 0,
             message: "SEO Audit completed successfully.",
         });
     } catch (error: any) {
-        console.error("Audit create error:", error);
-        // Attempt to mark as failed
-        if (error.auditId) {
-            await prisma.audit.update({
-                where: { id: error.auditId },
-                data: { status: "FAILED" }
-            }).catch(() => { });
-        }
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error("[Audit API] Fatal Error:", error);
+        return NextResponse.json({ 
+            error: error.message || "An unexpected error occurred during audit creation",
+            stack: error.stack,
+        }, { status: 500 });
     }
 }
