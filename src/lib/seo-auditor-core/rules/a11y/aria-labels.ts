@@ -35,7 +35,7 @@ const INTERACTIVE_SELECTORS = [
 /**
  * Check if element has accessible name via text content, title, or associated label
  */
-function hasAccessibleName($: cheerio.CheerioAPI, el: cheerio.Element): boolean {
+function hasAccessibleName($: any, el: any): boolean {
   const $el = $(el);
 
   // Check for visible text content
