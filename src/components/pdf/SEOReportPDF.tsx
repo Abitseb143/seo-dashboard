@@ -181,7 +181,7 @@ export const SEOReportPDF = ({ issues = [], projectName = "Project" }: SEOReport
 
                             {issue.currentState && (
                                 <View>
-                                    <Text style={styles.label}>📍 Where the problem is:</Text>
+                                    <Text style={styles.label}>- Where the problem is:</Text>
                                     <View style={[styles.codeBox, styles.currentCodeBox]}>
                                         <Text>{issue.currentState}</Text>
                                     </View>
@@ -189,13 +189,13 @@ export const SEOReportPDF = ({ issues = [], projectName = "Project" }: SEOReport
                             )}
 
                             <View>
-                                <Text style={styles.label}>🔧 Recommended Action:</Text>
+                                <Text style={styles.label}>- Recommended Action:</Text>
                                 <Text style={styles.problemSummary}>{fix?.recommendedAction}</Text>
                             </View>
 
                             {fix?.bestFixOption && (
                                 <View>
-                                    <Text style={styles.label}>✅ Replace with this code:</Text>
+                                    <Text style={styles.label}>- Replace with this code:</Text>
                                     <View style={[styles.codeBox, styles.replacementCodeBox]}>
                                         <Text>{fix.bestFixOption}</Text>
                                     </View>
@@ -204,7 +204,7 @@ export const SEOReportPDF = ({ issues = [], projectName = "Project" }: SEOReport
 
                             {issue.whyItMatters && (
                                 <View style={styles.whyItMattersBox}>
-                                    <Text style={[styles.label, { color: '#1E40AF', marginBottom: 4 }]}>💡 Why this matters:</Text>
+                                    <Text style={[styles.label, { color: '#1E40AF', marginBottom: 4 }]}>- Why this matters:</Text>
                                     <Text style={styles.whyItMattersText}>{issue.whyItMatters}</Text>
                                 </View>
                             )}
