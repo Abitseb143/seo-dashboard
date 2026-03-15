@@ -10,7 +10,7 @@ interface DownloadPDFButtonProps {
     projectName?: string;
 }
 
-export const DownloadPDFButton = ({ issues, projectName = "Project" }: DownloadPDFButtonProps) => {
+const DownloadPDFButton = ({ issues, projectName = "Project" }: DownloadPDFButtonProps) => {
     return (
         <PDFDownloadLink
             document={<SEOReportPDF issues={issues} projectName={projectName} />}
@@ -37,3 +37,5 @@ export const DownloadPDFButton = ({ issues, projectName = "Project" }: DownloadP
         </PDFDownloadLink>
     );
 };
+
+export default DownloadPDFButton;
