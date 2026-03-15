@@ -1,5 +1,5 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
 
 const styles = StyleSheet.create({
     page: {
@@ -32,76 +32,95 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     issueCard: {
-        marginBottom: 20,
-        padding: 15,
-        borderRadius: 10,
-        backgroundColor: '#F8FAFC',
+        marginBottom: 30,
+        padding: 20,
+        borderRadius: 12,
+        backgroundColor: '#FFFFFF',
         borderWidth: 1,
         borderColor: '#E2E8F0',
     },
     issueHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
+        alignItems: 'baseline',
+        marginBottom: 10,
     },
     issueTitle: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: 'bold',
-        color: '#1E293B',
+        color: '#0F172A',
         flex: 1,
     },
     badge: {
         paddingHorizontal: 8,
         paddingVertical: 4,
-        borderRadius: 4,
+        borderRadius: 20,
         fontSize: 9,
         fontWeight: 'bold',
+        marginLeft: 10,
+    },
+    severityCritical: {
+        backgroundColor: '#FFF1F2',
+        color: '#E11D48',
+        borderWidth: 1,
+        borderColor: '#FECDD3',
     },
     severityHigh: {
-        backgroundColor: '#FEE2E2',
-        color: '#B91C1C',
+        backgroundColor: '#FFFBEB',
+        color: '#B45309',
+        borderWidth: 1,
+        borderColor: '#FEF3C7',
     },
     severityMedium: {
-        backgroundColor: '#FEF3C7',
-        color: '#92400E',
+        backgroundColor: '#EFF6FF',
+        color: '#1D4ED8',
+        borderWidth: 1,
+        borderColor: '#DBEAFE',
     },
-    severityLow: {
-        backgroundColor: '#D1FAE5',
-        color: '#065F46',
-    },
-    metaRow: {
-        flexDirection: 'row',
-        gap: 15,
-        marginBottom: 10,
-    },
-    metaItem: {
-        fontSize: 10,
-        color: '#64748B',
-    },
-    fixTitle: {
+    problemSummary: {
         fontSize: 11,
+        color: '#475569',
+        marginBottom: 15,
+        lineHeight: 1.4,
+    },
+    label: {
+        fontSize: 10,
         fontWeight: 'bold',
-        color: '#0F172A',
-        marginTop: 10,
-        marginBottom: 5,
+        color: '#334155',
+        marginBottom: 6,
         textTransform: 'uppercase',
     },
-    fixContent: {
-        fontSize: 10,
-        color: '#475569',
-        lineHeight: 1.5,
+    codeBox: {
+        padding: 12,
+        borderRadius: 8,
+        fontFamily: 'Courier',
+        fontSize: 9,
+        marginBottom: 15,
     },
-    impactRow: {
-        marginTop: 12,
-        paddingTop: 8,
-        borderTopWidth: 1,
-        borderTopColor: '#E2E8F0',
+    currentCodeBox: {
+        backgroundColor: '#FEF2F2',
+        color: '#991B1B',
+        borderWidth: 1,
+        borderColor: '#FEE2E2',
     },
-    impactText: {
-        fontSize: 10,
-        fontWeight: 'bold',
-        color: '#0F172A',
+    replacementCodeBox: {
+        backgroundColor: '#ECFDF5',
+        color: '#065F46',
+        borderWidth: 1,
+        borderColor: '#D1FAE5',
+    },
+    whyItMattersBox: {
+        padding: 12,
+        borderRadius: 8,
+        backgroundColor: '#EFF6FF',
+        borderWidth: 1,
+        borderColor: '#DBEAFE',
+        marginTop: 5,
+    },
+    whyItMattersText: {
+        fontSize: 9,
+        color: '#1E40AF',
+        lineHeight: 1.4,
     },
     footer: {
         position: 'absolute',
@@ -114,6 +133,12 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#F1F5F9',
         paddingTop: 15,
+    },
+    urlText: {
+        fontSize: 9,
+        color: '#64748B',
+        fontFamily: 'Courier',
+        marginBottom: 10,
     }
 });
 
@@ -126,56 +151,69 @@ export const SEOReportPDF = ({ issues = [], projectName = "Project" }: SEOReport
     const safeIssues = Array.isArray(issues) ? issues : [];
     
     return (
-        <Document title={`SEO Report - ${projectName}`}>
+        <Document title={`Full SEO Report - ${projectName}`}>
             <Page size="A4" style={styles.page}>
                 <View style={styles.header}>
                     <Text style={styles.title}>SEO Audit Report</Text>
-                    <Text style={styles.subtitle}>{projectName} • {new Date().toLocaleDateString()}</Text>
+                    <Text style={styles.subtitle}>{projectName} • Detailed Recommendations • {new Date().toLocaleDateString()}</Text>
                 </View>
 
                 <Text style={styles.sectionTitle}>Prioritized SEO Fixes</Text>
 
-                {safeIssues.length > 0 ? (
-                    safeIssues.map((issue, index) => {
-                        const sev = (issue.severity || 'low').toLowerCase();
-                        const sevStyle = sev === 'high' || sev === 'critical' ? styles.severityHigh : 
-                                       sev === 'medium' ? styles.severityMedium : styles.severityLow;
+                {safeIssues.map((issue, index) => {
+                    const sev = (issue.severity || 'low').toLowerCase();
+                    const sevStyle = sev === 'critical' ? styles.severityCritical : 
+                                   sev === 'high' ? styles.severityHigh : styles.severityMedium;
+                    const fix = issue.recommendedFix;
 
-                        return (
-                            <View key={index} style={styles.issueCard} wrap={false}>
-                                <View style={styles.issueHeader}>
-                                    <Text style={styles.issueTitle}>{issue.issueTitle || 'Untitled Issue'}</Text>
-                                    <View style={[styles.badge, sevStyle]}>
-                                        <Text>{(issue.severity || 'LOW').toUpperCase()}</Text>
-                                    </View>
-                                </View>
-
-                                <View style={styles.metaRow}>
-                                    <Text style={styles.metaItem}>Category: {issue.category || 'General'}</Text>
-                                    {issue.pageUrl && <Text style={styles.metaItem}>URL: {issue.pageUrl}</Text>}
-                                </View>
-                                
-                                <Text style={styles.fixTitle}>Recommended Action</Text>
-                                <Text style={styles.fixContent}>
-                                    {issue.recommendedFix?.recommendedAction || 'Detailed fix instructions are available in the dashboard.'}
-                                </Text>
-                                
-                                <View style={styles.impactRow}>
-                                    <Text style={styles.impactText}>
-                                        SEO Impact: {issue.recommendedFix?.expectedSEOImpact ? `${issue.recommendedFix.expectedSEOImpact}/10` : 'Significant'}
-                                        {' • '}
-                                        Effort: {issue.recommendedFix?.estimatedEffort || 'Moderate'}
-                                    </Text>
+                    return (
+                        <View key={index} style={styles.issueCard} wrap={false}>
+                            <View style={styles.issueHeader}>
+                                <Text style={styles.issueTitle}>{issue.issueTitle}</Text>
+                                <View style={[styles.badge, sevStyle]}>
+                                    <Text>{sev.toUpperCase()} PRIORITY</Text>
                                 </View>
                             </View>
-                        );
-                    })
-                ) : (
-                    <Text style={styles.fixContent}>No issues found in this audit. Your SEO remains healthy!</Text>
-                )}
+
+                            {issue.pageUrl && <Text style={styles.urlText}>URL: {issue.pageUrl}</Text>}
+                            
+                            <Text style={styles.problemSummary}>{issue.problemSummary}</Text>
+
+                            {issue.currentState && (
+                                <View>
+                                    <Text style={styles.label}>📍 Where the problem is:</Text>
+                                    <View style={[styles.codeBox, styles.currentCodeBox]}>
+                                        <Text>{issue.currentState}</Text>
+                                    </View>
+                                </View>
+                            )}
+
+                            <View>
+                                <Text style={styles.label}>🔧 Recommended Action:</Text>
+                                <Text style={styles.problemSummary}>{fix?.recommendedAction}</Text>
+                            </View>
+
+                            {fix?.bestFixOption && (
+                                <View>
+                                    <Text style={styles.label}>✅ Replace with this code:</Text>
+                                    <View style={[styles.codeBox, styles.replacementCodeBox]}>
+                                        <Text>{fix.bestFixOption}</Text>
+                                    </View>
+                                </View>
+                            )}
+
+                            {issue.whyItMatters && (
+                                <View style={styles.whyItMattersBox}>
+                                    <Text style={[styles.label, { color: '#1E40AF', marginBottom: 4 }]}>💡 Why this matters:</Text>
+                                    <Text style={styles.whyItMattersText}>{issue.whyItMatters}</Text>
+                                </View>
+                            )}
+                        </View>
+                    );
+                })}
 
                 <Text style={styles.footer} fixed>
-                    Generated by SEO Fixer AI • Empowering your web presence.
+                    Generated by SEO Fixer AI • Fully Tailored SEO Solutions.
                 </Text>
             </Page>
         </Document>
