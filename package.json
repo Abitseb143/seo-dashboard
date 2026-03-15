@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@react-pdf/renderer": "^4.3.2",
     "@seomator/seo-audit": "file:../seo-audit-skill-main",
     "cheerio": "^1.2.0",
     "clsx": "^2.1.1",
