@@ -7,7 +7,7 @@ import { Loader2, Link as LinkIcon } from "lucide-react";
 export default function TopBar() {
     const router = useRouter();
     const [isRunning, setIsRunning] = useState(false);
-    const [targetUrl, setTargetUrl] = useState("https://www.synthera.com.au/");
+    const [targetUrl, setTargetUrl] = useState("");
 
     const handleRunAudit = async () => {
         if (!targetUrl) return;

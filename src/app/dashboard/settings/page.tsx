@@ -20,7 +20,8 @@ export default function SettingsPage() {
                             <label className="block text-sm font-semibold text-slate-700 mb-1">Target URL</label>
                             <input
                                 type="text"
-                                defaultValue="https://www.synthera.com.au/"
+                                defaultValue=""
+                                placeholder="https://example.com"
                                 className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                             />
                         </div>
@@ -28,7 +29,8 @@ export default function SettingsPage() {
                             <label className="block text-sm font-semibold text-slate-700 mb-1">Project Name</label>
                             <input
                                 type="text"
-                                defaultValue="Synthera Web App"
+                                defaultValue=""
+                                placeholder="My Project"
                                 className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                             />
                         </div>
