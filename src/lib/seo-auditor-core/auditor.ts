@@ -222,11 +222,42 @@ export class Auditor {
   }
 
   /**
+   * Reset all cross-page registries before a new audit
+   */
+  private async resetRegistries() {
+    try {
+      const { resetTitleRegistry } = await import('./rules/core/title-unique');
+      resetTitleRegistry();
+    } catch (e) {}
+    
+    try {
+      const { resetDescriptionRegistry } = await import('./rules/content/duplicate-description');
+      resetDescriptionRegistry();
+    } catch (e) {}
+
+    try {
+      const { resetDuplicateContentRegistry } = await import('./rules/content/duplicate-exact');
+      resetDuplicateContentRegistry();
+    } catch (e) {}
+
+    try {
+      const { resetNearDuplicateRegistry } = await import('./rules/content/duplicate-near');
+      resetNearDuplicateRegistry();
+    } catch (e) {}
+
+    try {
+      const { resetOrphanRegistry } = await import('./rules/crawl/sitemap-orphan-urls');
+      resetOrphanRegistry();
+    } catch (e) {}
+  }
+
+  /**
    * Run a single-page audit
    * @param url - URL to audit
    * @returns AuditResult for the page
    */
   async audit(url: string): Promise<AuditResult> {
+    await this.resetRegistries();
     await this.ensureRulesLoaded();
 
     // Fetch the page
