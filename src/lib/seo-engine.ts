@@ -23,6 +23,7 @@ export interface SEOIssueData {
     htmlState?: string;     // Value in raw HTML
     renderedState?: string; // Value after JS execution
     isComparison?: boolean; // Whether to show comparison UI
+    fixLabel?: string;      // Custom label for the fix section
 }
 
 /**
@@ -128,6 +129,15 @@ function extractCurrentState(result: RuleResult, ruleId: string): string {
         snippets.push("Heading structure:\n" + headings.map(h => `  ${h.tag}: ${h.text}`).join("\n"));
     }
 
+    // External Valid specific
+    if (ruleId.includes("external-valid")) {
+        const unreachable = (d.unreachableLinks as any[]) || [];
+        if (unreachable.length > 0) {
+            snippets.push(`Unreachable external URLs (${unreachable.length}):`);
+            unreachable.slice(0, 5).forEach(link => snippets.push(`  • ${link.href} (Status: ${link.statusCode})`));
+        }
+    }
+
     return snippets.length > 0 ? snippets.join("\n") : result.message;
 }
 
@@ -146,12 +156,19 @@ function extractFromDom($: any, selector: string, attr?: string): string {
 function buildFixSuggestion(result: RuleResult, ruleId: string, auditMode: string = 'static'): string {
     const d = result.details as Record<string, unknown> | undefined;
 
-    // 1. Meta Title (Site-Aware Fix)
+    // 1. Meta Title (Human-Readable Site-Aware Fix)
     if (ruleId.includes("title") && ruleId.includes("length")) {
         const current = typeof d?.title === "string" ? d.title : "Synthera";
         const brand = current.includes("|") ? current.split("|").pop()?.trim() : "Synthera";
-        const core = current.split("|")[0].trim().substring(0, 45);
-        return `<title>${core} | ${brand || "Synthera"}</title>\n<!-- Target length: 50-60 chars for best display -->`;
+        let core = current.split("|")[0].trim();
+        
+        // Human-readable shortening: find last space before 50 chars
+        if (core.length > 50) {
+            const cutIndex = core.lastIndexOf(" ", 50);
+            core = cutIndex > 20 ? core.substring(0, cutIndex) : core.substring(0, 50);
+        }
+        
+        return `<title>${core} | ${brand || "Synthera"}</title>\n<!-- Optimized for readability and branding -->`;
     }
 
     // 2. Meta Description (Real Fix)
@@ -162,26 +179,52 @@ function buildFixSuggestion(result: RuleResult, ruleId: string, auditMode: strin
         return `<meta name="description" content="Include your primary keyword naturally and a clear call-to-action. Target length: 150-160 characters.">`;
     }
 
-    // 3. Schema (Specific Fixes)
+    // 3. Schema (Specific Fixes - FIXED logic)
     if (ruleId.includes("schema") || ruleId.includes("structured")) {
-        if (ruleId.includes("localbusiness") && Array.isArray(d?.missingFields) && d.missingFields.includes("address")) {
-            return `<!-- FIX: Add specific address fields to your LocalBusiness schema -->\n"address": {\n  "@type": "PostalAddress",\n  "streetAddress": "Your Street",\n  "addressLocality": "Your City",\n  "addressRegion": "STATE",\n  "postalCode": "POSTCODE",\n  "addressCountry": "AU"\n}`;
+        const missingReq = (d?.missingFields as string[]) || [];
+        const missingRec = (d?.recommendedFields as string[]) || [];
+        const allMissing = Array.from(new Set([...missingReq, ...missingRec]));
+
+        if (ruleId.includes("localbusiness")) {
+            const addressBlock = missingReq.includes("address") || !result.message.toLowerCase().includes("address")
+                ? `\n  "address": {\n    "@type": "PostalAddress",\n    "streetAddress": "YOUR_STREET",\n    "addressLocality": "CITY",\n    "addressRegion": "STATE",\n    "postalCode": "POSTCODE",\n    "addressCountry": "AU"\n  },`
+                : "";
+            
+            return `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "Synthera",\n  "url": "https://www.synthera.com.au",${addressBlock}\n  "image": "https://www.synthera.com.au/logo.png"\n}\n</script>\n<!-- Missing fields to add: ${allMissing.join(", ") || "None"} -->`;
         }
+        
         if (ruleId.includes("organization")) {
-             return `<!-- FIX: Enhance Organization schema with sameAs links and logo -->\n"logo": "https://www.synthera.com.au/logo.png",\n"sameAs": [\n  "https://www.facebook.com/synthera",\n  "https://www.linkedin.com/company/synthera",\n  "https://twitter.com/synthera"\n]`;
+             return `<!-- FIX: Add missing fields: ${allMissing.join(", ")} -->\n"logo": "https://www.synthera.com.au/logo.png",\n"sameAs": [\n  "https://www.facebook.com/synthera",\n  "https://www.linkedin.com/company/synthera",\n  "https://twitter.com/synthera"\n]`;
         }
-        return `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "Synthera",\n  "url": "https://www.synthera.com.au"\n}\n</script>`;
+        return `<!-- Missing fields: ${allMissing.join(", ")} -->\n<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "Synthera",\n  "url": "https://www.synthera.com.au"\n}\n</script>`;
     }
 
-    // 4. Performance / CWV
-    if (isRenderRequired(ruleId)) {
+    // 4. Performance / CWV (Concrete fixes)
+    if (isRenderRequired(ruleId) || ruleId.includes("perf-")) {
         if (auditMode === 'static') {
-            return "This metric requires a Rendered audit. Run an audit in Rendered mode to get specific fixes.";
+            return "Measure performance in Rendered mode to get specific code fixes.";
         }
-        if (result.status === "pass") {
-            return "No critical performance issues detected. Continue monitoring Core Web Vitals.";
+        
+        if (ruleId.includes("lazy-above-fold")) {
+            return `<!-- FIX: Remove loading="lazy" from the hero image and add fetchpriority="high" -->\n<img \n  src="/path-to-hero-image.jpg" \n  loading="eager" \n  fetchpriority="high" \n  alt="Descriptive Alt Text"\n>`;
         }
-        return `<!-- Performance FIX: Prioritize LCP image -->\n<img src="/hero.webp" alt="Synthera AI" fetchpriority="high">\n<link rel="preload" as="image" href="/hero.webp">`;
+        
+        if (ruleId.includes("page-weight")) {
+            return `<!-- Recommendation: Reduce HTML size by externalizing inline JS/CSS -->\n1. Move large <script> blocks into .js files\n2. Move <style> blocks into .css files\n3. Minify HTML and enable Gzip/Brotli compression`;
+        }
+
+        if (ruleId.includes("js-size") || ruleId.includes("resource-size")) {
+            return `<!-- Recommendation: Externalize or Defer specific inline scripts -->\n<script src="/scripts/large-bundle.js" defer></script>\n<!-- Avoid large <script> blocks in the head whenever possible -->`;
+        }
+
+        return `<!-- Performance FIX: Prioritize LCP and critical resources -->\n<link rel="preload" as="image" href="/hero.webp" imagesrcset="..." fetchpriority="high">`;
+    }
+
+    // 5. External Links
+    if (ruleId.includes("external-valid")) {
+        const unreachable = (d?.unreachableLinks as any[]) || [];
+        const list = unreachable.slice(0, 3).map(l => `  • ${l.href}`).join("\n");
+        return `<!-- FIX: Update or remove unreachable external links -->\n${list || "  • Check your footer and sidebar for broken external links."}`;
     }
 
     // 5. Social Profiles
@@ -226,11 +269,11 @@ const CATEGORY_WEIGHTS: Record<string, number> = {
     content: 25,    // Main content depth/keywords
     technical: 20,  // Indexability/Schema
     perf: 15,       // Performance/CWV
-    crawler: 10,    // Sitemap/Orphans
-    links: 8,       // Internal/External links
+    crawler: 12,    // Sitemap/Orphans
+    links: 10,      // Internal/External links
     images: 5, schema: 5, security: 5,
     mobile: 5, redirect: 5, url: 3, js: 3, 
-    a11y: 2, eeat: 2, social: 1, // Advisory/Enhancements
+    a11y: 2, eeat: 1, social: 1, // Advisory (Lowest priority)
     geo: 1, i18n: 1, legal: 1, htmlval: 1
 };
 
@@ -415,6 +458,16 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
                 whyItMatters = "Performance metrics like LCP and CLS require a real browser to measure. " + whyItMatters;
             }
 
+            // Finalize issue data
+            let fixLabel = "Replace with this code";
+            if (ruleResult.ruleId.includes("orphan") || ruleResult.ruleId.includes("external-valid") || isAdvisory(ruleResult.ruleId)) {
+                fixLabel = "Suggested implementation";
+            } else if (ruleResult.ruleId.includes("schema") || ruleResult.ruleId.includes("structured")) {
+                fixLabel = "JSON-LD Implementation";
+            } else if (ruleResult.ruleId.includes("perf") || ruleResult.ruleId.includes("cwv")) {
+                fixLabel = "Technical Next Step";
+            }
+
             issues.push({
                 category: categoryName,
                 severity,
@@ -424,6 +477,7 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
                 currentState,
                 recommendedAction: recommendation || `Fix the ${issueTitle} issue described above.`,
                 bestFixOption: buildFixSuggestion(ruleResult, ruleResult.ruleId, auditMode),
+                fixLabel,
                 expectedSEOImpact: impact,
                 pageUrl: (d?.pageUrl as string) || url,
                 implementationDifficulty: difficulty,
