@@ -237,7 +237,7 @@ const CATEGORY_WEIGHTS: Record<string, number> = {
 export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
     const auditor = new Auditor({
         timeout: 30000,
-        measureCwv: true, // Use Playwright for accurate rendering and CWV
+        measureCwv: false, // Skip Playwright for speed
     });
 
     let auditResult;
