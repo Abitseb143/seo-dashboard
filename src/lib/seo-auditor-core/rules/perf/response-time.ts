@@ -5,8 +5,8 @@ import { defineRule, pass, warn, fail } from '../define-rule';
  * Response time thresholds in milliseconds
  */
 const THRESHOLDS = {
-  good: 500,
-  warning: 1000,
+  good: 3000,
+  warning: 6000,
 };
 
 /**

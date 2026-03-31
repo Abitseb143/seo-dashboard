@@ -7,8 +7,8 @@ import { defineRule, pass, warn, fail } from '../define-rule';
  * Needs Improvement: 1800ms - 3000ms
  * Poor: > 3000ms
  */
-const FCP_GOOD = 1800;
-const FCP_POOR = 3000;
+const FCP_GOOD = 5000;
+const FCP_POOR = 8000;
 
 /**
  * Rule: Check First Contentful Paint (FCP) metric

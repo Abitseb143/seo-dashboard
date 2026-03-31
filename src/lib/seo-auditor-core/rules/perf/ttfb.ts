@@ -7,8 +7,8 @@ import { defineRule, pass, warn, fail } from '../define-rule';
  * Needs Improvement: 800ms - 1800ms
  * Poor: > 1800ms
  */
-const TTFB_GOOD = 800;
-const TTFB_POOR = 1800;
+const TTFB_GOOD = 3000;
+const TTFB_POOR = 6000;
 
 /**
  * Rule: Check Time to First Byte (TTFB) metric

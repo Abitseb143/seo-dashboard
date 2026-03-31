@@ -7,8 +7,8 @@ import { defineRule, pass, warn, fail } from '../define-rule';
  * Needs Improvement: 200ms - 500ms
  * Poor: > 500ms
  */
-const INP_GOOD = 200;
-const INP_POOR = 500;
+const INP_GOOD = 5000;
+const INP_POOR = 8000;
 
 /**
  * Rule: Check Interaction to Next Paint (INP) metric

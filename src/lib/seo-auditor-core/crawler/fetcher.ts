@@ -81,28 +81,35 @@ export async function fetchPage(url: string, timeout = 30000): Promise<FetchResu
  * @returns HTTP status code
  */
 export async function fetchUrl(url: string, timeout = 10000): Promise<number> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  const doFetch = async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(url, {
+        method: 'HEAD',
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'SEOmatorBot/1.0 (+https://github.com/seo-skills/seo-audit-skill)',
+        },
+        redirect: 'follow',
+      });
+      return response.status;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  };
 
   try {
-    const response = await fetch(url, {
-      method: 'HEAD',
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'SEOmatorBot/1.0 (+https://github.com/seo-skills/seo-audit-skill)',
-      },
-      redirect: 'follow',
-    });
-
-    return response.status;
+    return await doFetch();
   } catch (error) {
-    // Return 0 for network errors, timeouts, etc.
-    if (error instanceof Error && error.name === 'AbortError') {
-      return 0; // Timeout
+    // Retry once on failure to prevent random score fluctuations
+    try {
+      return await doFetch();
+    } catch (retryError) {
+      if (retryError instanceof Error && retryError.name === 'AbortError') return 0;
+      return 0; // Network error
     }
-    return 0; // Network error
-  } finally {
-    clearTimeout(timeoutId);
   }
 }
 
