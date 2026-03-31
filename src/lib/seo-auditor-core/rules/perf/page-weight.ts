@@ -46,9 +46,21 @@ export const pageWeightRule = defineRule({
     const externalStylesheets = $('link[rel="stylesheet"]').length;
     const imageCount = $('img').length;
 
+    let inlineJsSize = 0;
+    $('script:not([src])').each((_: number, el: any) => {
+        inlineJsSize += Buffer.byteLength($(el).text(), 'utf8');
+    });
+
+    let inlineCssSize = 0;
+    $('style').each((_: number, el: any) => {
+        inlineCssSize += Buffer.byteLength($(el).text(), 'utf8');
+    });
+
     const details: Record<string, unknown> = {
       htmlBytes,
       htmlSize: formatBytes(htmlBytes),
+      inlineJsSize,
+      inlineCssSize,
       externalScripts,
       externalStylesheets,
       imageCount,

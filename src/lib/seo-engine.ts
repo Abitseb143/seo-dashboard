@@ -18,6 +18,8 @@ export interface SEOIssueData {
     codeExample?: string;
     cmsInstruction?: string;
     confidenceLevel: number;
+    auditSource?: 'static' | 'rendered' | 'api';
+    nextBestAction?: string;
 }
 
 /**
@@ -65,67 +67,62 @@ function estimateEffort(difficulty: number): string {
     return "1+ days";
 }
 
-/**
- * Extract a plain-English "current state" from rule details
- */
 function extractCurrentState(result: RuleResult, ruleId: string): string {
     const d = result.details as Record<string, unknown> | undefined;
     if (!d) return result.message;
 
-    // Try common detail fields from the CLI rules
     const snippets: string[] = [];
 
+    // Basic fields
     if (typeof d.title === "string") snippets.push(`Current title: "${d.title}"`);
     if (typeof d.description === "string") snippets.push(`Current description: "${d.description.substring(0, 120)}..."`);
     if (typeof d.characterCount === "number") snippets.push(`Length: ${d.characterCount} characters`);
-    if (typeof d.estimatedWidth === "number") snippets.push(`Estimated pixel width: ${d.estimatedWidth}px`);
     if (typeof d.wordCount === "number") snippets.push(`Word count: ${d.wordCount}`);
 
-    // Handle "issues" array which might contain complex objects (Title length, Heading length, etc.)
-    if (Array.isArray(d.issues) && d.issues.length > 0) {
-        if (ruleId.includes("heading-length")) {
-            const hIssues = (d.issues as any[]).slice(0, 3);
-            snippets.push("Headings with issues:\n" + hIssues.map(i => `  • H${i.level}: "${i.text}" (${i.length} chars)`).join("\n"));
-        } else if (ruleId.includes("anchor-text")) {
-            const aIssues = (d.issues as any[]).slice(0, 3);
-            snippets.push("Links with generic text:\n" + aIssues.map(i => `  • To ${i.href}: "${i.text}"`).join("\n"));
-        } else {
-            // General string fallback or first-level object mapping
-            const sample = d.issues[0];
-            if (typeof sample === "string") {
-                snippets.push(...(d.issues as string[]).slice(0, 3));
+    // Lazy load specific
+    if (ruleId.includes("lazy-above-fold")) {
+        const issues = (d.aboveFoldImages as any[]) || [];
+        if (issues.length > 0) {
+            const lazyImages = issues.filter(i => i.isLazy);
+            if (lazyImages.length > 0) {
+                snippets.push(`Found ${lazyImages.length} images above the fold with loading="lazy":`);
+                lazyImages.slice(0, 3).forEach(i => snippets.push(`  • ${i.src}`));
             } else {
-                snippets.push(`Found ${d.issues.length} specific instances of this issue.`);
+                snippets.push(`Total images found: ${d.totalImages || issues.length}`);
             }
         }
     }
 
-    if (Array.isArray(d.headings) && d.headings.length > 0) {
-        const headings = (d.headings as Array<{ tag: string, text: string }>).slice(0, 5);
-        snippets.push("Heading structure:\n" + headings.map(h => `  ${h.tag}: ${h.text}`).join("\n"));
-    }
-    if (typeof d.score === "number" && ruleId.includes("reading")) snippets.push(`Readability score: ${d.score} (${d.levelDescription || ""})`);
-    if (d.missingAlts !== undefined) snippets.push(`Images missing alt: ${d.missingAlts}`);
-    if (typeof d.totalImages === "number") snippets.push(`Total images: ${d.totalImages}`);
-
-    // Correct Text-to-HTML ratio math (input is already 0-100 percentage)
-    if (typeof d.ratio === "number") {
-        const value = d.ratio;
-        snippets.push(`Text-to-HTML ratio: ${value.toFixed(1)}%`);
-    }
-
-    if (Array.isArray(d.structure)) {
-        const structure = (d.structure as Array<{ level: number, text: string }>).slice(0, 5);
-        snippets.push("Found heading structure:\n" + structure.map(h => `  H${h.level}: ${h.text}`).join("\n"));
-    }
-    if (ruleId.includes("keyword-stuffing")) {
-        const overused = (d.overusedWords as any[]) || [];
-        const severe = (d.severelyOverusedWords as any[]) || [];
-        const all = [...severe, ...overused].slice(0, 10);
-        if (all.length > 0) {
-            snippets.push("Overused words found:");
-            all.forEach(item => snippets.push(`  • "${item.word}": ${item.density}% density (${item.count} times)`));
+    // Orphan URLs
+    if (ruleId.includes("orphan-urls")) {
+        const urls = (d.orphanUrls as string[]) || [];
+        if (urls.length > 0) {
+            snippets.push("Top orphan URLs (not linked internally):");
+            urls.slice(0, 5).forEach(u => snippets.push(`  • ${u}`));
         }
+    }
+
+    // Page weight
+    if (ruleId.includes("page-weight")) {
+        if (typeof d.totalSizeBytes === "number") snippets.push(`Total page size: ${(d.totalSizeBytes / 1024).toFixed(1)} KB`);
+        if (typeof d.inlineJsSize === "number") snippets.push(`Inline JS: ${(d.inlineJsSize / 1024).toFixed(1)} KB`);
+        if (typeof d.inlineCssSize === "number") snippets.push(`Inline CSS: ${(d.inlineCssSize / 1024).toFixed(1)} KB`);
+    }
+
+    // Schema specific
+    if (ruleId.includes("schema") || ruleId.includes("structured")) {
+        if (Array.isArray(d.missingFields) && d.missingFields.length > 0) {
+            snippets.push(`Missing fields: ${d.missingFields.join(", ")}`);
+        }
+        if (Array.isArray(d.recommendedFields) && d.recommendedFields.length > 0) {
+            snippets.push(`Recommended fields missing: ${d.recommendedFields.join(", ")}`);
+        }
+    }
+
+    // Heading structure fallback
+    if (Array.isArray(d.headings) && d.headings.length > 0 && snippets.length === 0) {
+        const headings = (d.headings as Array<{ tag: string, text: string }>).slice(0, 3);
+        snippets.push("Heading structure:\n" + headings.map(h => `  ${h.tag}: ${h.text}`).join("\n"));
     }
 
     return snippets.length > 0 ? snippets.join("\n") : result.message;
@@ -134,7 +131,15 @@ function extractCurrentState(result: RuleResult, ruleId: string): string {
 function buildFixSuggestion(result: RuleResult, ruleId: string, auditMode: string = 'static'): string {
     const d = result.details as Record<string, unknown> | undefined;
 
-    // 1. Meta Description (Real Fix)
+    // 1. Meta Title (Site-Aware Fix)
+    if (ruleId.includes("title") && ruleId.includes("length")) {
+        const current = typeof d?.title === "string" ? d.title : "Synthera";
+        const brand = current.includes("|") ? current.split("|").pop()?.trim() : "Synthera";
+        const core = current.split("|")[0].trim().substring(0, 45);
+        return `<title>${core} | ${brand || "Synthera"}</title>\n<!-- Target length: 50-60 chars for best display -->`;
+    }
+
+    // 2. Meta Description (Real Fix)
     if (ruleId.includes("description") && !ruleId.includes("duplicate")) {
         if (d?.pageUrl?.toString().includes("synthera.com.au") || d?.title?.toString().toLowerCase().includes("synthera")) {
             return `<meta name="description" content="Custom AI voice agents, WhatsApp chatbots and AI websites for Australian businesses. Automate support, bookings and sales with AI. Free consultation available.">`;
@@ -142,65 +147,36 @@ function buildFixSuggestion(result: RuleResult, ruleId: string, auditMode: strin
         return `<meta name="description" content="Include your primary keyword naturally and a clear call-to-action. Target length: 150-160 characters.">`;
     }
 
-    // 2. Schema (Real Fix)
+    // 3. Schema (Specific Fixes)
     if (ruleId.includes("schema") || ruleId.includes("structured")) {
-        if (d?.pageUrl?.toString().includes("synthera.com.au")) {
-            return `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "Synthera",\n  "url": "https://www.synthera.com.au",\n  "description": "AI automation solutions for Australian businesses including voice agents and chatbots.",\n  "address": {\n    "@type": "PostalAddress",\n    "addressCountry": "AU"\n  }\n}\n</script>`;
+        if (ruleId.includes("localbusiness") && Array.isArray(d?.missingFields) && d.missingFields.includes("address")) {
+            return `<!-- FIX: Add specific address fields to your LocalBusiness schema -->\n"address": {\n  "@type": "PostalAddress",\n  "streetAddress": "Your Street",\n  "addressLocality": "Your City",\n  "addressRegion": "STATE",\n  "postalCode": "POSTCODE",\n  "addressCountry": "AU"\n}`;
         }
-        return `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "Your Business Name",\n  "url": "https://yourdomain.com"\n}\n</script>`;
+        if (ruleId.includes("organization")) {
+             return `<!-- FIX: Enhance Organization schema with sameAs links and logo -->\n"logo": "https://www.synthera.com.au/logo.png",\n"sameAs": [\n  "https://www.facebook.com/synthera",\n  "https://www.linkedin.com/company/synthera",\n  "https://twitter.com/synthera"\n]`;
+        }
+        return `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "Synthera",\n  "url": "https://www.synthera.com.au"\n}\n</script>`;
     }
 
-    // 3. Render-Blocking Scripts
-    if (ruleId.includes("script") || ruleId.includes("js") || ruleId.includes("render-blocking")) {
-        return `<!-- Next.js Recommendation: Use the next/script component with 'strategy="lazyOnload"' or 'strategy="afterInteractive"' -->\n<Script src="/your-script.js" strategy="lazyOnload" />`;
-    }
-
-    // 4. Content Depth / Text-HTML Ratio (Real Suggestion)
-    if (ruleId.includes("word-count") || ruleId.includes("text-html-ratio")) {
-        return `<!-- FIX: Add 300-500 words of specific content to rank better -->\n<section>\n  <h2>AI Voice Agents for Australian Businesses</h2>\n  <p>Our custom AI voice agents automate your phone support and bookings. By reducing wait times and providing 24/7 service, you can scale without increasing overhead. Perfect for real estate, clinics, and hospitality.</p>\n</section>\n<section>\n  <h2>WhatsApp Chatbots & Sales Automation</h2>\n  <p>Engage customers where they are. Our WhatsApp bots handle lead qualification, FAQs, and appointment scheduling directly in the app. Increase conversion rates by up to 40% with automated follow-ups.</p>\n</section>`;
-    }
-
-    // 5. Anchor Text
-    if (ruleId.includes("anchor-text")) {
-        return `<!-- FIX: Replace generic text with keywords -->\n<a href="/services/ai-voice-agents">Explore our specialized AI Voice Agent solutions</a>`;
-    }
-
-    // 6. Brotli / Compression
-    if (ruleId.includes("compression") || ruleId.includes("brotli")) {
-        return `<!-- Server FIX: Enable Brotli in Cloudflare/Vercel settings or via Nginx: -->\nbrotli on;\nbrotli_types text/plain text/css application/javascript;`;
-    }
-
-    // 7. Sitemap / Orphan Pages
-    if (ruleId.includes("sitemap") && (ruleId.includes("orphan") || ruleId.includes("missing"))) {
-        return `<!-- FIX: Add an internal link from your home page or navigation to this page -->\n<a href="/our-ai-services">Explore our automation services</a>`;
-    }
-
-    // 8. Performance / CWV
-    if (ruleId.includes("perf") || ruleId.includes("cwv") || ruleId.includes("lcp")) {
-        // Only show performance fixes if we actually have a real issue (not just missing data)
+    // 4. Performance / CWV
+    if (isRenderRequired(ruleId)) {
+        if (auditMode === 'static') {
+            return "This metric requires a Rendered audit. Run an audit in Rendered mode to get specific fixes.";
+        }
         if (result.status === "pass") {
             return "No critical performance issues detected. Continue monitoring Core Web Vitals.";
-        }
-        if (auditMode === 'static') {
-            return "Performance metrics not measured in Static mode. Enable Rendered/API mode for specific fixes.";
         }
         return `<!-- Performance FIX: Prioritize LCP image -->\n<img src="/hero.webp" alt="Synthera AI" fetchpriority="high">\n<link rel="preload" as="image" href="/hero.webp">`;
     }
 
-    // 9. Canonical
-    if (ruleId.includes("canonical")) {
-        return `<link rel="canonical" href="https://www.synthera.com.au/" />`;
+    // 5. Social Profiles
+    if (ruleId.includes("profiles")) {
+        return `<!-- FIX: Add active social links to your footer and 'sameAs' in JSON-LD schema -->\n<footer>\n  <a href="https://linkedin.com/company/synthera">LinkedIn</a>\n  <a href="https://x.com/synthera">X (Twitter)</a>\n</footer>`;
     }
 
-    // 10. Heading Structure
-    if (ruleId.includes("heading-hierarchy")) {
-        return `<!-- Correct Hierarchy -->\n<h1>Synthera: AI Automation for Australia</h1>\n<h2>Our Core Services</h2>\n<h3>AI Voice Agents</h3>`;
-    }
-
-    // 11. Meta Description (Alternate/Secondary)
-    if (ruleId.includes("title") && ruleId.includes("pixel")) {
-        const title = typeof d?.title === "string" ? d.title : "Synthera";
-        return `<title>${title} | AI Voice Agents & Business Automation Australia</title>`;
+    // 6. Share Buttons
+    if (ruleId.includes("share-buttons")) {
+        return `<!-- Suggestion: Add social share buttons to high-value content pages -->\n<button onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + window.location.href)">Share on LinkedIn</button>`;
     }
 
     // Generic fallback 
@@ -229,14 +205,35 @@ function formatRuleTitle(ruleId: string): string {
         .join(" ");
 }
 
-// Category weight map (from the original CLI categories/index.ts)
+// Category weight map (Refined for better prioritization)
 const CATEGORY_WEIGHTS: Record<string, number> = {
-    core: 25, content: 20, technical: 15, perf: 10,
-    links: 8, images: 5, schema: 5, security: 5,
-    social: 3, mobile: 5, crawler: 5, redirect: 5,
-    url: 3, js: 3, a11y: 3, eeat: 2, geo: 2,
-    i18n: 2, legal: 1, htmlval: 2
+    core: 30,       // Crucial structural (Title, Canonical)
+    content: 25,    // Main content depth/keywords
+    technical: 20,  // Indexability/Schema
+    perf: 15,       // Performance/CWV
+    crawler: 10,    // Sitemap/Orphans
+    links: 8,       // Internal/External links
+    images: 5, schema: 5, security: 5,
+    mobile: 5, redirect: 5, url: 3, js: 3, 
+    a11y: 2, eeat: 2, social: 1, // Advisory/Enhancements
+    geo: 1, i18n: 1, legal: 1, htmlval: 1
 };
+
+/**
+ * Identify if a rule strictly requires a headless browser/rendering
+ */
+function isRenderRequired(ruleId: string): boolean {
+    const renderedRules = ["cwv-lcp", "cwv-cls", "cwv-fcp", "cwv-inp", "js-render-visibility"];
+    return renderedRules.some(r => ruleId.includes(r));
+}
+
+/**
+ * Identify if a rule is purely advisory/enhancement
+ */
+function isAdvisory(ruleId: string): boolean {
+    const advisoryKeywords = ["social", "share-buttons", "profiles", "author-expertise", "reading-level", "favicon"];
+    return advisoryKeywords.some(k => ruleId.toLowerCase().includes(k));
+}
 
 /**
  * Main audit function — uses the real CLI Auditor class with all 296 rules.
@@ -244,7 +241,7 @@ const CATEGORY_WEIGHTS: Record<string, number> = {
 export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
     const auditor = new Auditor({
         timeout: 30000,
-        measureCwv: true, // Use Playwright for accurate rendering and CWV
+        measureCwv: true, 
     });
 
     let auditResult;
@@ -255,12 +252,13 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
             category: "Technical", severity: "critical",
             issueTitle: "💥 Crawl Failed",
             problemSummary: `Could not reach the URL. Error: ${error.message}`,
-            whyItMatters: "The auditor could not reach the page. If the tool is blocked, search engine bots might be blocked too, preventing your site from being indexed.",
+            whyItMatters: "The auditor could not reach the page. If the bot is blocked, search engine bots might be blocked too.",
             currentState: `Error: ${error.message}`,
-            recommendedAction: "Check if the URL is correct, the site is live, and your server/firewall isn't blocking the auditor's IP.",
-            bestFixOption: "Ensure your site is accessible and your Railway container has sufficient CPU/Memory to run the engine.",
+            recommendedAction: "Check if the URL is correct and the site is live.",
+            bestFixOption: "Ensure your site is accessible and your server isn't blocking the auditor.",
             expectedSEOImpact: 10, implementationDifficulty: 8,
-            estimatedEffort: "Requires Developer", confidenceLevel: 100
+            estimatedEffort: "Requires Developer", confidenceLevel: 100,
+            nextBestAction: "Check server accessibility"
         }];
     }
 
@@ -284,7 +282,9 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
         expectedSEOImpact: 0,
         implementationDifficulty: 1,
         estimatedEffort: "N/A",
-        confidenceLevel: 100
+        confidenceLevel: 100,
+        auditSource: auditMode,
+        nextBestAction: auditMode === 'static' ? "Switch to Rendered Mode" : "Continue monitoring"
     });
 
     for (const catResult of auditResult.categoryResults as CategoryResult[]) {
@@ -292,6 +292,27 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
         const categoryName = formatCategoryName(catResult.categoryId);
 
         for (const ruleResult of catResult.results) {
+            // Handle Render-Required rules in Static mode
+            if (isRenderRequired(ruleResult.ruleId) && auditMode === 'static') {
+                issues.push({
+                    category: categoryName,
+                    severity: "low",
+                    issueTitle: formatRuleTitle(ruleResult.ruleId),
+                    problemSummary: `This metric (${formatRuleTitle(ruleResult.ruleId)}) could not be measured in Static mode.`,
+                    whyItMatters: "Web Vitals and JS-rendered content require a real browser to be measured accurately.",
+                    currentState: "Not measured in Static mode",
+                    recommendedAction: "Run the audit in Rendered mode to capture this metric.",
+                    bestFixOption: "N/A",
+                    expectedSEOImpact: 0,
+                    implementationDifficulty: 1,
+                    estimatedEffort: "N/A",
+                    confidenceLevel: 100,
+                    auditSource: auditMode,
+                    nextBestAction: "Switch to Rendered Mode"
+                });
+                continue;
+            }
+
             // Skip passing rules
             if (ruleResult.status === "pass") continue;
 
@@ -303,25 +324,37 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
 
             // Filter out "Headless Browser unavailable" noise
             if (ruleResult.ruleId === "system-browser-check" || ruleResult.message.includes("Headless Browser unavailable") || ruleResult.message.includes("Could not measure")) {
-                if (auditMode !== 'static') continue; // Only skip if we have other ways to measure
+                if (auditMode !== 'static') continue; 
             }
 
             const recommendation = (d?.recommendation as string) || (d?.impact as string) || "";
+            const issueTitle = formatRuleTitle(ruleResult.ruleId);
+            const currentState = extractCurrentState(ruleResult, ruleResult.ruleId);
+
+            // Generate Next Best Action
+            let nextBestAction = "Implement fix";
+            if (ruleResult.ruleId.includes("title")) nextBestAction = "Shorten title tag";
+            else if (ruleResult.ruleId.includes("schema")) nextBestAction = "Add missing schema fields";
+            else if (ruleResult.ruleId.includes("orphan")) nextBestAction = "Add internal links";
+            else if (ruleResult.ruleId.includes("lazy-above-fold")) nextBestAction = "Remove lazy loading";
+            else if (isAdvisory(ruleResult.ruleId)) nextBestAction = "Add social signals";
 
             issues.push({
                 category: categoryName,
                 severity,
-                issueTitle: formatRuleTitle(ruleResult.ruleId),
+                issueTitle,
                 problemSummary: ruleResult.message,
                 whyItMatters: (d?.impact as string) || recommendation || `Fixing this improves your ${categoryName} score.`,
-                currentState: extractCurrentState(ruleResult, ruleResult.ruleId),
-                recommendedAction: recommendation || `Fix the ${formatRuleTitle(ruleResult.ruleId)} issue described above.`,
+                currentState,
+                recommendedAction: recommendation || `Fix the ${issueTitle} issue described above.`,
                 bestFixOption: buildFixSuggestion(ruleResult, ruleResult.ruleId, auditMode),
                 expectedSEOImpact: impact,
                 pageUrl: (d?.pageUrl as string) || url,
                 implementationDifficulty: difficulty,
                 estimatedEffort: estimateEffort(difficulty),
-                confidenceLevel: ruleResult.status === "fail" ? 100 : 80
+                confidenceLevel: ruleResult.status === "fail" ? 100 : 80,
+                auditSource: auditMode,
+                nextBestAction
             });
         }
     }
