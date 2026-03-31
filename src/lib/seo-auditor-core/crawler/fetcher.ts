@@ -484,6 +484,8 @@ export function createAuditContext(
     url,
     html,
     $,
+    staticHtml: html,
+    static$: $,
     headers,
     statusCode,
     responseTime,
@@ -496,4 +498,30 @@ export function createAuditContext(
     inlineSvgs: extractInlineSvgs($),
     pictureElements: extractPictureElements($),
   };
+}
+
+/**
+ * Update an existing AuditContext with rendered DOM data
+ * Re-runs extraction to ensure all JS-injected elements are included
+ */
+export function refreshContextWithRenderedDom(
+    context: AuditContext,
+    renderedHtml: string,
+    rendered$: any
+): void {
+    context.renderedHtml = renderedHtml;
+    context.rendered$ = rendered$;
+    
+    // Switch primary $ to rendered
+    context.$ = rendered$;
+    
+    // Re-extract evidence from rendered DOM
+    const { links, invalidLinks } = extractLinks(rendered$, context.url);
+    context.links = links;
+    context.invalidLinks = invalidLinks;
+    context.images = extractImages(rendered$, context.url);
+    context.specialLinks = extractSpecialLinks(rendered$);
+    context.figures = extractFigures(rendered$);
+    context.inlineSvgs = extractInlineSvgs(rendered$);
+    context.pictureElements = extractPictureElements(rendered$);
 }

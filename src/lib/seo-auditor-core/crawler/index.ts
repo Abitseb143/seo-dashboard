@@ -3,6 +3,7 @@ export {
   fetchPage,
   fetchUrl,
   createAuditContext,
+  refreshContextWithRenderedDom,
   type FetchResult,
 } from './fetcher';
 

@@ -12,6 +12,7 @@ import { loadAllRules } from './rules/loader';
 import {
   fetchPage,
   createAuditContext,
+  refreshContextWithRenderedDom,
   fetchPageWithPlaywright,
   fetchCwvFromPsi,
   closeBrowser,
@@ -302,9 +303,8 @@ export class Auditor {
 
     // Enrich with robots.txt, sitemap, and rendered DOM
     await this.enrichContext(context, url);
-    if (renderedHtml) {
-      context.renderedHtml = renderedHtml;
-      context.rendered$ = rendered$;
+    if (renderedHtml && rendered$) {
+      refreshContextWithRenderedDom(context, renderedHtml, rendered$);
     }
 
     // Run all categories

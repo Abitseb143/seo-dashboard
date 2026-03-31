@@ -165,8 +165,12 @@ export interface AuditContext {
   url: string;
   /** Raw HTML content of the page */
   html: string;
-  /** Cheerio instance for DOM querying */
+  /** Cheerio instance for DOM querying (primary source - static or rendered depending on mode) */
   $: any;
+  /** Original static HTML content */
+  staticHtml?: string;
+  /** Cheerio instance of original static HTML */
+  static$?: any;
   /** HTTP response headers */
   headers: Record<string, string>;
   /** HTTP status code */
