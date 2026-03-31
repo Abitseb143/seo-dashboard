@@ -1,0 +1,64 @@
+﻿Starting SEO Audit for https://www.synthera.com.au/ ...
+
+Γ£à Audit Complete! Found 17 issues to fix.
+
+[1] [HIGH] Title Length
+    Message: Title is too long (61 characters). Recommended: 30-60 characters
+    Current State: Current title: "AI Voice Agents & Chatbots for Australian Business | Synthera"
+    Impact: 10/10 | Difficulty: 2/10
+    Category: Core
+
+[2] [MEDIUM] Lcp
+    Message: Could not measure Largest Contentful Paint
+    Current State: Could not measure Largest Contentful Paint
+    Impact: 5/10 | Difficulty: 7/10
+    Category: Perf
+
+[3] [MEDIUM] Cls
+    Message: Could not measure Cumulative Layout Shift
+    Current State: Could not measure Cumulative Layout Shift
+    Impact: 5/10 | Difficulty: 7/10
+    Category: Perf
+
+[4] [MEDIUM] Inp
+    Message: Could not measure Interaction to Next Paint (no user interaction detected or metric not available)
+    Current State: Could not measure Interaction to Next Paint (no user interaction detected or metric not available)
+    Impact: 5/10 | Difficulty: 7/10
+    Category: Perf
+
+[5] [MEDIUM] Ttfb
+    Message: Could not measure Time to First Byte
+    Current State: Could not measure Time to First Byte
+    Impact: 5/10 | Difficulty: 7/10
+    Category: Perf
+
+[6] [MEDIUM] Fcp
+    Message: Could not measure First Contentful Paint
+    Current State: Could not measure First Contentful Paint
+    Impact: 5/10 | Difficulty: 7/10
+    Category: Perf
+
+[7] [MEDIUM] Render Blocking
+    Message: Render-blocking resources found: 1 script(s) in <head> without async/defer
+    Current State: Render-blocking resources found: 1 script(s) in <head> without async/defer
+    Impact: 5/10 | Difficulty: 7/10
+    Category: Perf
+
+[8] [MEDIUM] Lazy Above Fold
+    Message: 1 above-fold image(s) have loading="lazy"
+    Current State: Total images: 2
+    Impact: 5/10 | Difficulty: 7/10
+    Category: Perf
+
+[9] [MEDIUM] Page Weight
+    Message: HTML document is 135KB (recommended: <100KB) ΓÇö consider externalizing inline resources
+    Current State: HTML document is 135KB (recommended: <100KB) ΓÇö consider externalizing inline resources
+    Impact: 5/10 | Difficulty: 7/10
+    Category: Perf
+
+[10] [MEDIUM] Js File Size
+    Message: Total inline JavaScript is 73KB across 38 script(s) (recommended: <50KB) ΓÇö consider externalizing
+    Current State: Total inline JavaScript is 73KB across 38 script(s) (recommended: <50KB) ΓÇö consider externalizing
+    Impact: 5/10 | Difficulty: 7/10
+    Category: Perf
+
