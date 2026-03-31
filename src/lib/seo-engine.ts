@@ -152,7 +152,7 @@ function buildFixSuggestion(result: RuleResult, ruleId: string): string {
 
     // 3. Render-Blocking Scripts
     if (ruleId.includes("script") || ruleId.includes("js") || ruleId.includes("render-blocking")) {
-        return `<!-- FIX: Add 'defer' to your main scripts in the <head> -->\n<script src="/js/main.js" defer></script>`;
+        return `<!-- Next.js Recommendation: Use the next/script component with 'strategy="lazyOnload"' or 'strategy="afterInteractive"' -->\n<Script src="/your-script.js" strategy="lazyOnload" />`;
     }
 
     // 4. Content Depth / Text-HTML Ratio (Real Suggestion)
@@ -248,10 +248,10 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
             category: "Technical", severity: "critical",
             issueTitle: "💥 Crawl Failed",
             problemSummary: `Could not reach the URL. Error: ${error.message}`,
-            whyItMatters: "If the tool cannot reach your site, Google's bots may also be blocked.",
+            whyItMatters: "The auditor could not reach the page. If the tool is blocked, search engine bots might be blocked too, preventing your site from being indexed.",
             currentState: `Error: ${error.message}`,
-            recommendedAction: "Check that the URL is correct and publicly accessible.",
-            bestFixOption: "Ensure the site is live and not blocking crawlers.",
+            recommendedAction: "Check if the URL is correct, the site is live, and your server/firewall isn't blocking the auditor's IP.",
+            bestFixOption: "Ensure your site is accessible and your Railway container has sufficient CPU/Memory to run the engine.",
             expectedSEOImpact: 10, implementationDifficulty: 8,
             estimatedEffort: "Requires Developer", confidenceLevel: 100
         }];

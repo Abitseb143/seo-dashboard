@@ -43,17 +43,21 @@ function analyzeRenderBlocking($: AuditContext['$']): RenderBlockingAnalysis {
     if (isModule) moduleScripts++;
 
     // External script without async/defer/module
-    if (src && !isAsync && !isDefer && !isModule) {
+    const isNextScript = $(el).attr('data-nscript') !== undefined || src?.includes('/_next/static/');
+    if (src && !isAsync && !isDefer && !isModule && !isNextScript) {
       blockingScripts.push({ src, inHead: true });
     }
 
     // Large inline scripts (blocking)
     if (!src) {
       const content = $(el).html() || '';
-      const sizeKb = Math.round(content.length / 1024);
-      inlineScriptsInHead++;
-      if (sizeKb > 10) {
-        largeInlineScripts.push({ size: sizeKb });
+      const isNextData = content.includes('__NEXT_DATA__');
+      if (!isNextData) {
+        const sizeKb = Math.round(content.length / 1024);
+        inlineScriptsInHead++;
+        if (sizeKb > 10) {
+          largeInlineScripts.push({ size: sizeKb });
+        }
       }
     }
   });

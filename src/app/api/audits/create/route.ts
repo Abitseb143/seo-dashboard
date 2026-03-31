@@ -73,16 +73,17 @@ export async function POST(req: Request) {
                     },
                 });
 
-                console.log(`[Audit] Saving ${liveIssues.length} issues to database...`);
-                for (const issue of liveIssues) {
-                    const priorityRank = calculatePriorityRank(
-                        issue.severity,
-                        issue.expectedSEOImpact,
-                        issue.implementationDifficulty
-                    );
+                console.log(`[Audit] Saving ${liveIssues.length} issues to database via transaction...`);
+                
+                await prisma.$transaction(
+                    liveIssues.map(issue => {
+                        const priorityRank = calculatePriorityRank(
+                            issue.severity,
+                            issue.expectedSEOImpact,
+                            issue.implementationDifficulty
+                        );
 
-                    try {
-                        await prisma.issue.create({
+                        return prisma.issue.create({
                             data: {
                                 pageAuditId: pageAudit.id,
                                 category: issue.category,
@@ -108,10 +109,8 @@ export async function POST(req: Request) {
                                 },
                             },
                         });
-                    } catch (e: any) {
-                        console.error(`[Audit] Failed to save issue "${issue.issueTitle}":`, e.message);
-                    }
-                }
+                    })
+                );
             }
 
             const overallScore = totalScore / targetUrls.length;

@@ -20,6 +20,9 @@ const GENERIC_PATTERNS = [
   /^\/?untitled(-\d+)?$/i,
   /^\/?new-page(-\d+)?$/i,
   /^\/?copy(-of)?(-\d+)?$/i,
+  
+  // Next.js internal paths (ignore in generic check)
+  /^\/?_next\//i,
 ];
 
 /**
