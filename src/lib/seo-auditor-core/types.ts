@@ -271,6 +271,8 @@ export interface AuditResult {
   crawledPages: number;
   /** How the audit was performed ('static' | 'rendered' | 'api') */
   auditMode: 'static' | 'rendered' | 'api';
+  staticHtml?: string;
+  renderedHtml?: string;
 }
 
 /**

@@ -20,6 +20,9 @@ export interface SEOIssueData {
     confidenceLevel: number;
     auditSource?: 'static' | 'rendered' | 'api';
     nextBestAction?: string;
+    htmlState?: string;     // Value in raw HTML
+    renderedState?: string; // Value after JS execution
+    isComparison?: boolean; // Whether to show comparison UI
 }
 
 /**
@@ -127,6 +130,18 @@ function extractCurrentState(result: RuleResult, ruleId: string): string {
 
     return snippets.length > 0 ? snippets.join("\n") : result.message;
 }
+
+/**
+ * Extract a specific value (Title/Desc) from a Cheerio context
+ */
+function extractFromDom($: any, selector: string, attr?: string): string {
+    if (!$) return "❌ missing";
+    const el = $(selector);
+    if (!el.length) return "❌ missing";
+    const val = attr ? el.attr(attr) : el.text();
+    return val ? `✅ present ("${val.substring(0, 30)}${val.length > 30 ? '...' : ''}")` : "❌ missing";
+}
+
 
 function buildFixSuggestion(result: RuleResult, ruleId: string, auditMode: string = 'static'): string {
     const d = result.details as Record<string, unknown> | undefined;
@@ -265,6 +280,10 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
     const issues: SEOIssueData[] = [];
     const auditMode = auditResult.auditMode || 'static';
 
+    const cheerio = await import('cheerio');
+    const static$ = auditResult.staticHtml ? cheerio.load(auditResult.staticHtml) : null;
+    const rendered$ = auditResult.renderedHtml ? cheerio.load(auditResult.renderedHtml) : null;
+
     // Add an informational "Audit Mode" issue
     issues.push({
         category: "System",
@@ -272,12 +291,12 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
         issueTitle: `Audit Mode: ${auditMode.charAt(0).toUpperCase() + auditMode.slice(1)}`,
         problemSummary: `This audit was performed in ${auditMode} mode.`,
         whyItMatters: auditMode === 'static' 
-            ? "Static mode analyzes raw HTML only and does not measure JavaScript rendering or real-world performance."
+            ? "Static mode analyzes raw HTML only. IMPORTANT: LCP, CLS, INP, and FCP require JS execution and a real browser. Static HTML alone can NEVER measure them."
             : auditMode === 'api'
                 ? "API mode uses remote data (PSI/CrUX) to measure performance without requiring a local browser."
-                : "Rendered mode uses a real headless browser for the most accurate SEO and performance analysis.",
+                : "Rendered mode uses a real headless browser (Playwright) for the most accurate analysis. This captures JS-injected content and CWV metrics.",
         currentState: `Mode: ${auditMode}`,
-        recommendedAction: auditMode === 'static' ? "Consider enabling Rendered mode for deeper analysis." : "Everything looks good.",
+        recommendedAction: auditMode === 'static' ? "Enable Rendered mode to measure performance and JS content." : "Everything looks good.",
         bestFixOption: "N/A",
         expectedSEOImpact: 0,
         implementationDifficulty: 1,
@@ -299,8 +318,8 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
                     severity: "low",
                     issueTitle: formatRuleTitle(ruleResult.ruleId),
                     problemSummary: `This metric (${formatRuleTitle(ruleResult.ruleId)}) could not be measured in Static mode.`,
-                    whyItMatters: "Web Vitals and JS-rendered content require a real browser to be measured accurately.",
-                    currentState: "Not measured in Static mode",
+                    whyItMatters: "To measure LCP, CLS, INP, and FCP, you MUST use a real browser (Playwright/Lighthouse) with JS execution. Static HTML alone can NEVER measure them.",
+                    currentState: "Not measurable in Static mode",
                     recommendedAction: "Run the audit in Rendered mode to capture this metric.",
                     bestFixOption: "N/A",
                     expectedSEOImpact: 0,
@@ -333,18 +352,39 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
 
             // Generate Next Best Action
             let nextBestAction = "Implement fix";
-            if (ruleResult.ruleId.includes("title")) nextBestAction = "Shorten title tag";
+            let htmlState: string | undefined;
+            let renderedState: string | undefined;
+            let isComparison = false;
+
+            if (ruleResult.ruleId.includes("title")) {
+                nextBestAction = "Shorten title tag";
+                htmlState = extractFromDom(static$, "title");
+                renderedState = extractFromDom(rendered$, "title");
+                isComparison = htmlState !== renderedState && auditMode === 'rendered';
+            }
+            else if (ruleResult.ruleId.includes("description")) {
+                nextBestAction = "Update meta description";
+                htmlState = extractFromDom(static$, 'meta[name="description"]', "content");
+                renderedState = extractFromDom(rendered$, 'meta[name="description"]', "content");
+                isComparison = htmlState !== renderedState && auditMode === 'rendered';
+            }
             else if (ruleResult.ruleId.includes("schema")) nextBestAction = "Add missing schema fields";
             else if (ruleResult.ruleId.includes("orphan")) nextBestAction = "Add internal links";
             else if (ruleResult.ruleId.includes("lazy-above-fold")) nextBestAction = "Remove lazy loading";
             else if (isAdvisory(ruleResult.ruleId)) nextBestAction = "Add social signals";
+
+            // Specialized whyItMatters for Performance
+            let whyItMatters = (d?.impact as string) || recommendation || `Fixing this improves your ${categoryName} score.`;
+            if (isRenderRequired(ruleResult.ruleId)) {
+                whyItMatters = "Performance metrics like LCP and CLS require a real browser to measure. " + whyItMatters;
+            }
 
             issues.push({
                 category: categoryName,
                 severity,
                 issueTitle,
                 problemSummary: ruleResult.message,
-                whyItMatters: (d?.impact as string) || recommendation || `Fixing this improves your ${categoryName} score.`,
+                whyItMatters,
                 currentState,
                 recommendedAction: recommendation || `Fix the ${issueTitle} issue described above.`,
                 bestFixOption: buildFixSuggestion(ruleResult, ruleResult.ruleId, auditMode),
@@ -354,7 +394,10 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
                 estimatedEffort: estimateEffort(difficulty),
                 confidenceLevel: ruleResult.status === "fail" ? 100 : 80,
                 auditSource: auditMode,
-                nextBestAction
+                nextBestAction,
+                htmlState,
+                renderedState,
+                isComparison
             });
         }
     }

@@ -312,7 +312,16 @@ export class Auditor {
 
     // Build and return final result
     const timestamp = new Date().toISOString();
-    return buildAuditResult(url, categoryResults, this.categoriesToAudit, timestamp, 1, auditMode);
+    return buildAuditResult(
+      url, 
+      categoryResults, 
+      this.categoriesToAudit, 
+      timestamp, 
+      1, 
+      auditMode, 
+      fetchResult.html, 
+      renderedHtml
+    );
   }
 
   /**
