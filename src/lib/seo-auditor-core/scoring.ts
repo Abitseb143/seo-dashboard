@@ -3,6 +3,7 @@ import type {
   CategoryResult,
   CategoryDefinition,
   AuditResult,
+  CoreWebVitals,
 } from './types';
 
 /**
@@ -141,7 +142,8 @@ export function buildAuditResult(
   crawledPages = 1,
   auditMode: 'static' | 'rendered' | 'api' = 'static',
   staticHtml?: string,
-  renderedHtml?: string
+  renderedHtml?: string,
+  cwv?: CoreWebVitals
 ): AuditResult {
   return {
     url,
@@ -152,5 +154,6 @@ export function buildAuditResult(
     auditMode,
     staticHtml,
     renderedHtml,
+    cwv,
   };
 }

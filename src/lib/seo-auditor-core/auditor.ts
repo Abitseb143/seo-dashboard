@@ -320,7 +320,8 @@ export class Auditor {
       1, 
       auditMode, 
       fetchResult.html, 
-      renderedHtml
+      renderedHtml,
+      cwv
     );
   }
 

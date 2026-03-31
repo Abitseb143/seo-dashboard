@@ -293,10 +293,12 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
         whyItMatters: auditMode === 'static' 
             ? "Static mode analyzes raw HTML only. IMPORTANT: LCP, CLS, INP, and FCP require JS execution and a real browser. Static HTML alone can NEVER measure them."
             : auditMode === 'api'
-                ? "API mode uses remote data (PSI/CrUX) to measure performance without requiring a local browser."
-                : "Rendered mode uses a real headless browser (Playwright) for the most accurate analysis. This captures JS-injected content and CWV metrics.",
-        currentState: `Mode: ${auditMode}`,
-        recommendedAction: auditMode === 'static' ? "Enable Rendered mode to measure performance and JS content." : "Everything looks good.",
+                ? "API mode uses the Google Lighthouse engine remotely to measure performance."
+                : "Rendered mode uses a local Lighthouse/Playwright environment for the most accurate analysis.",
+        currentState: auditResult.cwv?.lighthouseScore 
+            ? `Mode: ${auditMode} | Lighthouse Score: ${auditResult.cwv.lighthouseScore}/100`
+            : `Mode: ${auditMode}`,
+        recommendedAction: auditMode === 'static' ? "Enable Rendered/API mode to measure performance." : "Review Lighthouse metrics below.",
         bestFixOption: "N/A",
         expectedSEOImpact: 0,
         implementationDifficulty: 1,
@@ -305,6 +307,26 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
         auditSource: auditMode,
         nextBestAction: auditMode === 'static' ? "Switch to Rendered Mode" : "Continue monitoring"
     });
+
+    // Add specialized Lighthouse Score result if measured
+    if (auditMode !== 'static' && auditResult.cwv?.lighthouseScore !== undefined) {
+        issues.push({
+            category: "Performance",
+            severity: auditResult.cwv.lighthouseScore >= 90 ? "low" : auditResult.cwv.lighthouseScore >= 50 ? "medium" : "critical",
+            issueTitle: `Lighthouse Score: ${auditResult.cwv.lighthouseScore}/100`,
+            problemSummary: `Lighthouse measured a performance score of ${auditResult.cwv.lighthouseScore} for this page.`,
+            whyItMatters: "Lighthouse captures real-world performance metrics. A score above 90 is considered good; below 50 indicates significant performance bottlenecks.",
+            currentState: `Performance Score: ${auditResult.cwv.lighthouseScore}/100`,
+            recommendedAction: "Focus on improving the Core Web Vitals (LCP, CLS) listed in this report.",
+            bestFixOption: "N/A",
+            expectedSEOImpact: 8,
+            implementationDifficulty: 5,
+            estimatedEffort: "Ongoing Optimization",
+            confidenceLevel: 100,
+            auditSource: auditMode,
+            nextBestAction: "Optimize Web Vitals"
+        });
+    }
 
     for (const catResult of auditResult.categoryResults as CategoryResult[]) {
         const categoryWeight = CATEGORY_WEIGHTS[catResult.categoryId] ?? 5;
@@ -332,6 +354,20 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
                 continue;
             }
 
+            const d = ruleResult.details as Record<string, unknown> | undefined;
+            const cwv = auditResult.cwv;
+            let currentState = ruleResult.message;
+            const recommendation = (d?.recommendation as string) || (d?.impact as string);
+
+            // Performance specific labeling
+            if (ruleResult.ruleId.startsWith("perf") || ruleResult.ruleId.startsWith("cwv")) {
+                if (auditMode !== 'static') {
+                    currentState = `Measured via Lighthouse: ${ruleResult.message}`;
+                    if (cwv?.speedIndex) currentState += ` | Speed Index: ${Math.round(cwv.speedIndex)}ms`;
+                    if (cwv?.tbt) currentState += ` | TBT: ${Math.round(cwv.tbt)}ms`;
+                }
+            }
+
             // Skip passing rules
             if (ruleResult.status === "pass") continue;
 
@@ -339,16 +375,16 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
             const impact = estimateImpact(ruleResult, categoryWeight);
             const difficulty = estimateDifficulty(catResult.categoryId);
 
-            const d = ruleResult.details as Record<string, unknown> | undefined;
-
             // Filter out "Headless Browser unavailable" noise
             if (ruleResult.ruleId === "system-browser-check" || ruleResult.message.includes("Headless Browser unavailable") || ruleResult.message.includes("Could not measure")) {
                 if (auditMode !== 'static') continue; 
             }
 
-            const recommendation = (d?.recommendation as string) || (d?.impact as string) || "";
             const issueTitle = formatRuleTitle(ruleResult.ruleId);
-            const currentState = extractCurrentState(ruleResult, ruleResult.ruleId);
+            // Use extractCurrentState for general evidence, but allow the performance-specific override
+            if (!ruleResult.ruleId.startsWith("perf") && !ruleResult.ruleId.startsWith("cwv")) {
+                currentState = extractCurrentState(ruleResult, ruleResult.ruleId);
+            }
 
             // Generate Next Best Action
             let nextBestAction = "Implement fix";

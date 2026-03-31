@@ -22,6 +22,7 @@ export async function fetchCwvFromPsi(url: string, apiKey?: string): Promise<Cor
         const data = await response.json();
         const loadingExperience = data.loadingExperience?.metrics;
         const lighthouse = data.lighthouseResult?.audits;
+        const performanceScore = data.lighthouseResult?.categories?.performance?.score;
 
         return {
             lcp: lighthouse?.['largest-contentful-paint']?.numericValue,
@@ -29,6 +30,9 @@ export async function fetchCwvFromPsi(url: string, apiKey?: string): Promise<Cor
             cls: lighthouse?.['cumulative-layout-shift']?.numericValue,
             ttfb: lighthouse?.['server-response-time']?.numericValue,
             inp: loadingExperience?.['INTERACTION_TO_NEXT_PAINT']?.percentile,
+            lighthouseScore: performanceScore ? Math.round(performanceScore * 100) : undefined,
+            speedIndex: lighthouse?.['speed-index']?.numericValue,
+            tbt: lighthouse?.['total-blocking-time']?.numericValue,
         };
     } catch (error) {
         console.error('[PSI] Failed to fetch metrics:', error);

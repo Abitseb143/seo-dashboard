@@ -35,6 +35,12 @@ export interface CoreWebVitals {
   fcp?: number;
   /** Interaction to Next Paint in milliseconds */
   inp?: number;
+  /** Lighthouse performance score (0-100) */
+  lighthouseScore?: number;
+  /** Speed Index in milliseconds */
+  speedIndex?: number;
+  /** Total Blocking Time in milliseconds */
+  tbt?: number;
 }
 
 /**
@@ -273,6 +279,7 @@ export interface AuditResult {
   auditMode: 'static' | 'rendered' | 'api';
   staticHtml?: string;
   renderedHtml?: string;
+  cwv?: CoreWebVitals;
 }
 
 /**
