@@ -16,6 +16,11 @@ export {
   type PlaywrightFetchResult,
 } from './playwright-fetcher';
 
+// PSI fetcher exports
+export {
+  fetchCwvFromPsi,
+} from './psi-fetcher';
+
 // Crawler exports
 export {
   Crawler,

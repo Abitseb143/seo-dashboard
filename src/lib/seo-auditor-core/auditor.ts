@@ -13,12 +13,12 @@ import {
   fetchPage,
   createAuditContext,
   fetchPageWithPlaywright,
+  fetchCwvFromPsi,
   closeBrowser,
   Crawler,
   type CrawledPage,
   type PlaywrightFetchResult,
 } from './crawler/index';
-import { fetchCwvFromPsi } from './crawler/psi-fetcher';
 import {
   buildCategoryResult,
   buildAuditResult,
