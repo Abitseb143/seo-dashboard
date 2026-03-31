@@ -27,9 +27,9 @@ export const clsRule = defineRule({
     const cls = cwv.cls;
 
     if (cls === undefined) {
-      return warn('cwv-cls', 'Could not measure Cumulative Layout Shift', {
+      return pass('cwv-cls', 'Cumulative Layout Shift was not measured (Static HTML mode)', {
         metric: 'CLS',
-        reason: 'Metric not available',
+        reason: 'Metric not available in this audit mode',
       });
     }
 

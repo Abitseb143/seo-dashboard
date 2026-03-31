@@ -138,7 +138,8 @@ export function buildAuditResult(
   categoryResults: CategoryResult[],
   categories: CategoryDefinition[],
   timestamp: string,
-  crawledPages = 1
+  crawledPages = 1,
+  auditMode: 'static' | 'rendered' | 'api' = 'static'
 ): AuditResult {
   return {
     url,
@@ -146,5 +147,6 @@ export function buildAuditResult(
     categoryResults,
     timestamp,
     crawledPages,
+    auditMode,
   };
 }

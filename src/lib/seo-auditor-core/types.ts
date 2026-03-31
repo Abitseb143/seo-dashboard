@@ -269,6 +269,8 @@ export interface AuditResult {
   timestamp: string;
   /** Number of pages crawled (if crawl mode enabled) */
   crawledPages: number;
+  /** How the audit was performed ('static' | 'rendered' | 'api') */
+  auditMode: 'static' | 'rendered' | 'api';
 }
 
 /**

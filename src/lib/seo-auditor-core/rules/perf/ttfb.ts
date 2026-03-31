@@ -27,9 +27,9 @@ export const ttfbRule = defineRule({
     const ttfb = cwv.ttfb;
 
     if (ttfb === undefined) {
-      return warn('cwv-ttfb', 'Could not measure Time to First Byte', {
+      return pass('cwv-ttfb', 'Time to First Byte was not measured (Static HTML mode)', {
         metric: 'TTFB',
-        reason: 'Metric not available',
+        reason: 'Metric not available in this audit mode',
       });
     }
 

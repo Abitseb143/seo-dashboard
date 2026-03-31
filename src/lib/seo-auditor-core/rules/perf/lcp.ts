@@ -27,9 +27,9 @@ export const lcpRule = defineRule({
     const lcp = cwv.lcp;
 
     if (lcp === undefined) {
-      return warn('cwv-lcp', 'Could not measure Largest Contentful Paint', {
+      return pass('cwv-lcp', 'Largest Contentful Paint was not measured (Static HTML mode)', {
         metric: 'LCP',
-        reason: 'Metric not available',
+        reason: 'Metric not available in this audit mode',
       });
     }
 

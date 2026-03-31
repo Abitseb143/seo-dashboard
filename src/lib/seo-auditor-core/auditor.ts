@@ -18,6 +18,7 @@ import {
   type CrawledPage,
   type PlaywrightFetchResult,
 } from './crawler/index';
+import { fetchCwvFromPsi } from './crawler/psi-fetcher';
 import {
   buildCategoryResult,
   buildAuditResult,
@@ -267,6 +268,8 @@ export class Auditor {
     let cwv: CoreWebVitals = {};
     let renderedHtml: string | undefined;
     let rendered$: any | undefined;
+    let auditMode: 'static' | 'rendered' | 'api' = 'static';
+
     if (this.options.measureCwv) {
       const fetcher = this.options.browserFetcher ?? fetchPageWithPlaywright;
       try {
@@ -277,9 +280,15 @@ export class Auditor {
           const cheerio = await import('cheerio');
           renderedHtml = pwResult.html;
           rendered$ = cheerio.load(pwResult.html);
+          auditMode = 'rendered';
         }
-      } catch {
-        // CWV measurement failed, continue without it
+      } catch (error) {
+        // Playwright failed, fallback to PSI API for performance metrics
+        console.warn(`[Auditor] Playwright failed, falling back to PSI API for ${url}`);
+        cwv = await fetchCwvFromPsi(url);
+        if (cwv.lcp || cwv.fcp) {
+          auditMode = 'api';
+        }
       } finally {
         // Clean up Playwright browser (only when not using an injected fetcher)
         if (!this.options.browserFetcher) {
@@ -303,7 +312,7 @@ export class Auditor {
 
     // Build and return final result
     const timestamp = new Date().toISOString();
-    return buildAuditResult(url, categoryResults, this.categoriesToAudit, timestamp, 1);
+    return buildAuditResult(url, categoryResults, this.categoriesToAudit, timestamp, 1, auditMode);
   }
 
   /**

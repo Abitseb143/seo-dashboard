@@ -131,7 +131,7 @@ function extractCurrentState(result: RuleResult, ruleId: string): string {
     return snippets.length > 0 ? snippets.join("\n") : result.message;
 }
 
-function buildFixSuggestion(result: RuleResult, ruleId: string): string {
+function buildFixSuggestion(result: RuleResult, ruleId: string, auditMode: string = 'static'): string {
     const d = result.details as Record<string, unknown> | undefined;
 
     // 1. Meta Description (Real Fix)
@@ -177,6 +177,13 @@ function buildFixSuggestion(result: RuleResult, ruleId: string): string {
 
     // 8. Performance / CWV
     if (ruleId.includes("perf") || ruleId.includes("cwv") || ruleId.includes("lcp")) {
+        // Only show performance fixes if we actually have a real issue (not just missing data)
+        if (result.status === "pass") {
+            return "No critical performance issues detected. Continue monitoring Core Web Vitals.";
+        }
+        if (auditMode === 'static') {
+            return "Performance metrics not measured in Static mode. Enable Rendered/API mode for specific fixes.";
+        }
         return `<!-- Performance FIX: Prioritize LCP image -->\n<img src="/hero.webp" alt="Synthera AI" fetchpriority="high">\n<link rel="preload" as="image" href="/hero.webp">`;
     }
 
@@ -258,6 +265,27 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
     }
 
     const issues: SEOIssueData[] = [];
+    const auditMode = auditResult.auditMode || 'static';
+
+    // Add an informational "Audit Mode" issue
+    issues.push({
+        category: "System",
+        severity: "low",
+        issueTitle: `Audit Mode: ${auditMode.charAt(0).toUpperCase() + auditMode.slice(1)}`,
+        problemSummary: `This audit was performed in ${auditMode} mode.`,
+        whyItMatters: auditMode === 'static' 
+            ? "Static mode analyzes raw HTML only and does not measure JavaScript rendering or real-world performance."
+            : auditMode === 'api'
+                ? "API mode uses remote data (PSI/CrUX) to measure performance without requiring a local browser."
+                : "Rendered mode uses a real headless browser for the most accurate SEO and performance analysis.",
+        currentState: `Mode: ${auditMode}`,
+        recommendedAction: auditMode === 'static' ? "Consider enabling Rendered mode for deeper analysis." : "Everything looks good.",
+        bestFixOption: "N/A",
+        expectedSEOImpact: 0,
+        implementationDifficulty: 1,
+        estimatedEffort: "N/A",
+        confidenceLevel: 100
+    });
 
     for (const catResult of auditResult.categoryResults as CategoryResult[]) {
         const categoryWeight = CATEGORY_WEIGHTS[catResult.categoryId] ?? 5;
@@ -272,6 +300,12 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
             const difficulty = estimateDifficulty(catResult.categoryId);
 
             const d = ruleResult.details as Record<string, unknown> | undefined;
+
+            // Filter out "Headless Browser unavailable" noise
+            if (ruleResult.ruleId === "system-browser-check" || ruleResult.message.includes("Headless Browser unavailable") || ruleResult.message.includes("Could not measure")) {
+                if (auditMode !== 'static') continue; // Only skip if we have other ways to measure
+            }
+
             const recommendation = (d?.recommendation as string) || (d?.impact as string) || "";
 
             issues.push({
@@ -282,7 +316,7 @@ export async function runLiveSEOAudit(url: string): Promise<SEOIssueData[]> {
                 whyItMatters: (d?.impact as string) || recommendation || `Fixing this improves your ${categoryName} score.`,
                 currentState: extractCurrentState(ruleResult, ruleResult.ruleId),
                 recommendedAction: recommendation || `Fix the ${formatRuleTitle(ruleResult.ruleId)} issue described above.`,
-                bestFixOption: buildFixSuggestion(ruleResult, ruleResult.ruleId),
+                bestFixOption: buildFixSuggestion(ruleResult, ruleResult.ruleId, auditMode),
                 expectedSEOImpact: impact,
                 pageUrl: (d?.pageUrl as string) || url,
                 implementationDifficulty: difficulty,

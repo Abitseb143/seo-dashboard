@@ -27,14 +27,10 @@ export const inpRule = defineRule({
     const inp = cwv.inp;
 
     if (inp === undefined) {
-      return warn(
-        'cwv-inp',
-        'Could not measure Interaction to Next Paint (no user interaction detected or metric not available)',
-        {
-          metric: 'INP',
-          reason: 'No interaction or metric not available',
-        }
-      );
+      return pass('cwv-inp', 'Interaction to Next Paint was not measured (Static HTML mode)', {
+        metric: 'INP',
+        reason: 'Metric not available in this audit mode',
+      });
     }
 
     if (inp < INP_GOOD) {

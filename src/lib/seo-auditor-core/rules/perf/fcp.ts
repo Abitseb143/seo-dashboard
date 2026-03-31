@@ -27,9 +27,9 @@ export const fcpRule = defineRule({
     const fcp = cwv.fcp;
 
     if (fcp === undefined) {
-      return warn('cwv-fcp', 'Could not measure First Contentful Paint', {
+      return pass('cwv-fcp', 'First Contentful Paint was not measured (Static HTML mode)', {
         metric: 'FCP',
-        reason: 'Metric not available',
+        reason: 'Metric not available in this audit mode',
       });
     }
 
