@@ -243,9 +243,9 @@ export class Auditor {
         cwv = pwResult.cwv;
         // Capture rendered HTML for JS rendering rules
         if (pwResult.html) {
-          renderedHtml = pwResult.html;
           const cheerio = await import('cheerio');
-          rendered$ = cheerio.load(renderedHtml);
+          renderedHtml = pwResult.html;
+          rendered$ = cheerio.load(pwResult.html);
         }
       } catch {
         // CWV measurement failed, continue without it
