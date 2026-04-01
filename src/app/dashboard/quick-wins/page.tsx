@@ -2,6 +2,8 @@ import { Zap } from "lucide-react";
 import { FixCard } from "@/components/ui/FixCard";
 import { getLatestAuditData } from "@/lib/audit-data";
 
+export const dynamic = "force-dynamic";
+
 export default async function QuickWinsPage() {
   const latestAudit = await getLatestAuditData();
   const issues = latestAudit?.quickWins ?? [];

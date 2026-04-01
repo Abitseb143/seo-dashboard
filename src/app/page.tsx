@@ -3,6 +3,8 @@ import { AlertTriangle, ArrowUpRight, CheckCircle, Code, Zap } from "lucide-reac
 import ScoreTrendChart from "@/components/dashboard/ScoreTrendChart";
 import { getLatestAuditData, getScoreTrend } from "@/lib/audit-data";
 
+export const dynamic = "force-dynamic";
+
 export default async function OverviewDashboard() {
   const [latestAudit, trend] = await Promise.all([getLatestAuditData(), getScoreTrend()]);
 

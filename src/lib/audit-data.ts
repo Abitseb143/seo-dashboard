@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { unstable_noStore as noStore } from "next/cache";
 
 type RecommendedFixData = {
   recommendedAction: string;
@@ -106,23 +107,35 @@ function sortIssuesByPriority(issues: DashboardIssue[]): DashboardIssue[] {
   });
 }
 
+function logAuditDataError(scope: string, error: unknown): void {
+  console.error(`[audit-data] ${scope} failed`, error);
+}
+
 export async function getLatestAuditData(): Promise<LatestAuditData | null> {
-  const latestAudit = await prisma.audit.findFirst({
-    where: { status: "COMPLETED" },
-    orderBy: { createdAt: "desc" },
-    include: {
-      project: true,
-      pageAudits: {
-        include: {
-          issues: {
-            include: {
-              recommendedFix: true,
+  noStore();
+
+  let latestAudit;
+  try {
+    latestAudit = await prisma.audit.findFirst({
+      where: { status: "COMPLETED" },
+      orderBy: { createdAt: "desc" },
+      include: {
+        project: true,
+        pageAudits: {
+          include: {
+            issues: {
+              include: {
+                recommendedFix: true,
+              },
             },
           },
         },
       },
-    },
-  });
+    });
+  } catch (error) {
+    logAuditDataError("getLatestAuditData", error);
+    return null;
+  }
 
   if (!latestAudit) {
     return null;
@@ -157,18 +170,26 @@ export async function getLatestAuditData(): Promise<LatestAuditData | null> {
 }
 
 export async function getAuditHistory(): Promise<AuditHistoryEntry[]> {
-  const audits = await prisma.audit.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 20,
-    include: {
-      project: true,
-      pageAudits: {
-        include: {
-          issues: true,
+  noStore();
+
+  let audits;
+  try {
+    audits = await prisma.audit.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 20,
+      include: {
+        project: true,
+        pageAudits: {
+          include: {
+            issues: true,
+          },
         },
       },
-    },
-  });
+    });
+  } catch (error) {
+    logAuditDataError("getAuditHistory", error);
+    return [];
+  }
 
   return audits.map((audit) => {
     const totalIssues = audit.pageAudits.reduce((sum, pageAudit) => sum + pageAudit.issues.length, 0);
@@ -185,15 +206,23 @@ export async function getAuditHistory(): Promise<AuditHistoryEntry[]> {
 }
 
 export async function getScoreTrend(limit = 5): Promise<TrendPoint[]> {
-  const audits = await prisma.audit.findMany({
-    where: { status: "COMPLETED" },
-    orderBy: { createdAt: "asc" },
-    take: limit,
-    select: {
-      createdAt: true,
-      overallScore: true,
-    },
-  });
+  noStore();
+
+  let audits;
+  try {
+    audits = await prisma.audit.findMany({
+      where: { status: "COMPLETED" },
+      orderBy: { createdAt: "asc" },
+      take: limit,
+      select: {
+        createdAt: true,
+        overallScore: true,
+      },
+    });
+  } catch (error) {
+    logAuditDataError("getScoreTrend", error);
+    return [];
+  }
 
   return audits.map((audit) => ({
     name: audit.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
@@ -202,11 +231,19 @@ export async function getScoreTrend(limit = 5): Promise<TrendPoint[]> {
 }
 
 export async function getLatestProjectLabel(): Promise<string> {
-  const latestAudit = await prisma.audit.findFirst({
-    where: { status: "COMPLETED" },
-    orderBy: { createdAt: "desc" },
-    include: { project: true },
-  });
+  noStore();
+
+  let latestAudit;
+  try {
+    latestAudit = await prisma.audit.findFirst({
+      where: { status: "COMPLETED" },
+      orderBy: { createdAt: "desc" },
+      include: { project: true },
+    });
+  } catch (error) {
+    logAuditDataError("getLatestProjectLabel", error);
+    return "SEO Project";
+  }
 
   return latestAudit?.project.name || latestAudit?.project.url || "SEO Project";
 }

@@ -2,6 +2,8 @@ import DownloadPDFButton from "@/components/ui/DownloadPDFButton";
 import { FixCard } from "@/components/ui/FixCard";
 import { getLatestAuditData } from "@/lib/audit-data";
 
+export const dynamic = "force-dynamic";
+
 export default async function BestFixesPage() {
   const latestAudit = await getLatestAuditData();
   const issues = latestAudit?.bestFixes ?? [];

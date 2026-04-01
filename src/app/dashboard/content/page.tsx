@@ -2,6 +2,8 @@ import { FileText } from "lucide-react";
 import { FixCard } from "@/components/ui/FixCard";
 import { getLatestAuditData } from "@/lib/audit-data";
 
+export const dynamic = "force-dynamic";
+
 export default async function ContentSEOPage() {
   const latestAudit = await getLatestAuditData();
   const issues = latestAudit?.contentFixes ?? [];
