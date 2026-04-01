@@ -54,7 +54,7 @@ function estimateImpact(result: RuleResult, categoryWeight: number): number {
 function estimateDifficulty(categoryId: string): number {
     const easy = ["content", "core"];
     const medium = ["schema", "social", "images", "links", "technical", "geo"];
-    const hard = ["perf", "js", "crawler", "redirect", "htmlval"];
+    const hard = ["perf", "js", "crawl", "redirect", "htmlval"];
     if (easy.includes(categoryId)) return 2;
     if (medium.includes(categoryId)) return 4;
     if (hard.includes(categoryId)) return 7;
@@ -153,13 +153,35 @@ function extractFromDom($: any, selector: string, attr?: string): string {
 }
 
 
+function getSiteProfile(pageUrl: string, title?: string): {
+    siteName: string;
+    origin: string;
+} {
+    try {
+        const parsed = new URL(pageUrl);
+        const siteName = title?.split("|").pop()?.trim() || parsed.hostname.replace(/^www\./, "");
+        return {
+            siteName: siteName || "Your Brand",
+            origin: parsed.origin,
+        };
+    } catch {
+        return {
+            siteName: title?.split("|").pop()?.trim() || "Your Brand",
+            origin: "https://example.com",
+        };
+    }
+}
+
 function buildFixSuggestion(result: RuleResult, ruleId: string, auditMode: string = 'static'): string {
     const d = result.details as Record<string, unknown> | undefined;
+    const pageUrl = typeof d?.pageUrl === "string" ? d.pageUrl : "https://example.com";
+    const title = typeof d?.title === "string" ? d.title : undefined;
+    const siteProfile = getSiteProfile(pageUrl, title);
 
     // 1. Meta Title (Human-Readable Site-Aware Fix)
     if (ruleId.includes("title") && ruleId.includes("length")) {
-        const current = typeof d?.title === "string" ? d.title : "Synthera";
-        const brand = current.includes("|") ? current.split("|").pop()?.trim() : "Synthera";
+        const current = typeof d?.title === "string" ? d.title : siteProfile.siteName;
+        const brand = current.includes("|") ? current.split("|").pop()?.trim() : siteProfile.siteName;
         let core = current.split("|")[0].trim();
         
         // Human-readable shortening: find last space before 50 chars
@@ -168,15 +190,12 @@ function buildFixSuggestion(result: RuleResult, ruleId: string, auditMode: strin
             core = cutIndex > 20 ? core.substring(0, cutIndex) : core.substring(0, 50);
         }
         
-        return `<title>${core} | ${brand || "Synthera"}</title>\n<!-- Optimized for readability and branding -->`;
+        return `<title>${core} | ${brand || siteProfile.siteName}</title>\n<!-- Optimized for readability and branding -->`;
     }
 
     // 2. Meta Description (Real Fix)
     if (ruleId.includes("description") && !ruleId.includes("duplicate")) {
-        if (d?.pageUrl?.toString().includes("synthera.com.au") || d?.title?.toString().toLowerCase().includes("synthera")) {
-            return `<meta name="description" content="Custom AI voice agents, WhatsApp chatbots and AI websites for Australian businesses. Automate support, bookings and sales with AI. Free consultation available.">`;
-        }
-        return `<meta name="description" content="Include your primary keyword naturally and a clear call-to-action. Target length: 150-160 characters.">`;
+        return `<meta name="description" content="Explain what ${siteProfile.siteName} offers, include the main keyword naturally, and finish with a clear call to action. Target length: 150-160 characters.">`;
     }
 
     // 3. Schema (Specific Fixes - FIXED logic)
@@ -185,18 +204,18 @@ function buildFixSuggestion(result: RuleResult, ruleId: string, auditMode: strin
         const missingRec = (d?.recommendedFields as string[]) || [];
         const allMissing = Array.from(new Set([...missingReq, ...missingRec]));
 
-        if (ruleId.includes("localbusiness")) {
+        if (ruleId.includes("local-business")) {
             const addressBlock = missingReq.includes("address") || !result.message.toLowerCase().includes("address")
                 ? `\n  "address": {\n    "@type": "PostalAddress",\n    "streetAddress": "YOUR_STREET",\n    "addressLocality": "CITY",\n    "addressRegion": "STATE",\n    "postalCode": "POSTCODE",\n    "addressCountry": "AU"\n  },`
                 : "";
             
-            return `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "Synthera",\n  "url": "https://www.synthera.com.au",${addressBlock}\n  "image": "https://www.synthera.com.au/logo.png"\n}\n</script>\n<!-- Missing fields to add: ${allMissing.join(", ") || "None"} -->`;
+            return `<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "${siteProfile.siteName}",\n  "url": "${siteProfile.origin}",${addressBlock}\n  "image": "${siteProfile.origin}/logo.png"\n}\n</script>\n<!-- Missing fields to add: ${allMissing.join(", ") || "None"} -->`;
         }
         
         if (ruleId.includes("organization")) {
-             return `<!-- FIX: Add missing fields: ${allMissing.join(", ")} -->\n"logo": "https://www.synthera.com.au/logo.png",\n"sameAs": [\n  "https://www.facebook.com/synthera",\n  "https://www.linkedin.com/company/synthera",\n  "https://twitter.com/synthera"\n]`;
+             return `<!-- FIX: Add missing fields: ${allMissing.join(", ")} -->\n"logo": "${siteProfile.origin}/logo.png",\n"sameAs": [\n  "https://www.linkedin.com/company/your-brand",\n  "https://www.facebook.com/your-brand",\n  "https://x.com/your-brand"\n]`;
         }
-        return `<!-- Missing fields: ${allMissing.join(", ")} -->\n<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "LocalBusiness",\n  "name": "Synthera",\n  "url": "https://www.synthera.com.au"\n}\n</script>`;
+        return `<!-- Missing fields: ${allMissing.join(", ")} -->\n<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "Organization",\n  "name": "${siteProfile.siteName}",\n  "url": "${siteProfile.origin}"\n}\n</script>`;
     }
 
     // 4. Performance / CWV (Concrete fixes)
@@ -229,7 +248,7 @@ function buildFixSuggestion(result: RuleResult, ruleId: string, auditMode: strin
 
     // 5. Social Profiles
     if (ruleId.includes("profiles")) {
-        return `<!-- FIX: Add active social links to your footer and 'sameAs' in JSON-LD schema -->\n<footer>\n  <a href="https://linkedin.com/company/synthera">LinkedIn</a>\n  <a href="https://x.com/synthera">X (Twitter)</a>\n</footer>`;
+        return `<!-- FIX: Add active social links to your footer and "sameAs" in JSON-LD schema -->\n<footer>\n  <a href="https://linkedin.com/company/your-brand">LinkedIn</a>\n  <a href="https://x.com/your-brand">X</a>\n</footer>`;
     }
 
     // 6. Share Buttons

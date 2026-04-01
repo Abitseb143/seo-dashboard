@@ -32,17 +32,37 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "At least one target URL is required" }, { status: 400 });
         }
 
-        // Optional: Use existing project or create a new dummy one
+        let projectUrl = targetUrls[0];
+        let normalizedProjectName = projectName || "SEO Project";
+        try {
+            const parsedUrl = new URL(targetUrls[0]);
+            projectUrl = parsedUrl.origin;
+            normalizedProjectName = parsedUrl.hostname;
+        } catch {
+            // Keep user input if URL parsing fails here. The auditor will validate it later.
+        }
+
+        // Reuse an existing project for the same site when possible.
         let dbProjectId = projectId;
         if (!dbProjectId) {
-            console.log("[Audit API] Creating new project for:", targetUrls[0]);
-            const p = await prisma.project.create({
-                data: {
-                    url: targetUrls[0] || "https://www.synthera.com.au/",
-                    name: projectName || "Auto Created Project",
+            const existingProject = await prisma.project.findFirst({
+                where: {
+                    url: projectUrl,
                 },
             });
-            dbProjectId = p.id;
+
+            if (existingProject) {
+                dbProjectId = existingProject.id;
+            } else {
+                console.log("[Audit API] Creating new project for:", projectUrl);
+                const p = await prisma.project.create({
+                    data: {
+                        url: projectUrl,
+                        name: normalizedProjectName,
+                    },
+                });
+                dbProjectId = p.id;
+            }
         }
 
         // Create Audit
@@ -143,7 +163,6 @@ export async function POST(req: Request) {
         console.error("[Audit API] Fatal Error:", error);
         return NextResponse.json({ 
             error: error.message || "An unexpected error occurred during audit creation",
-            stack: error.stack,
         }, { status: 500 });
     }
 }
